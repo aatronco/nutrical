@@ -3,11 +3,13 @@
 
   #topnav, .no-print, .anchors, .btn, .science-toggle, .science-panel { display: none !important; }
 
-  body { background: #fff; color: #000; font-size: 11pt; }
+  body { background: #fff; color: #000; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body::after { display: none; }
   #main { max-width: none; padding: 0; margin: 0; }
 
-  .card { border: 1px solid #ccc; break-inside: avoid; }
-  .report-section { break-before: auto; break-inside: avoid; margin-bottom: 16pt; }
+  .card { border: 1px solid #ddd; break-inside: avoid; box-shadow: none; }
+  .card:hover { box-shadow: none; }
+  .report-section { break-before: auto; break-inside: avoid; margin-bottom: 14pt; }
   .report-section.page-break { break-before: page; }
 
   /* Ensure canvas (Chart.js) renders in print */
