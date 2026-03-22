@@ -55,9 +55,7 @@ export async function validateSpreadsheet(id) {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
-  if (!res.ok) return false;
-  const data = await res.json();
-  return Array.isArray(data.values);
+  return res.ok;
 }
 
 // ── Patients ──────────────────────────────────────────────────────────────────
