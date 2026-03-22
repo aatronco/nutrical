@@ -11,6 +11,23 @@ export function saveSpreadsheetId(id) {
   localStorage.setItem('spreadsheet_id', id.trim());
 }
 
+// ── Auto-create spreadsheet on first login ────────────────────────────────────
+export async function createSpreadsheet() {
+  const data = await request(`${BASE}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      properties: { title: 'Nutrical' },
+      sheets: [
+        { properties: { title: 'Pacientes' } },
+        { properties: { title: 'Consultas' } },
+      ],
+    }),
+  });
+  if (!data?.spreadsheetId) return null;
+  saveSpreadsheetId(data.spreadsheetId);
+  return data.spreadsheetId;
+}
+
 function showToast(msg, isError = false) {
   const el = document.createElement('div');
   el.className = 'toast' + (isError ? ' error' : '');
@@ -80,13 +97,13 @@ export async function savePatient(patient) {
 
   if (idx === -1) {
     // Append
-    await request(`${BASE}/${id}/values/Pacientes!A:A:append?valueInputOption=RAW`, {
+    return request(`${BASE}/${id}/values/Pacientes!A:A:append?valueInputOption=RAW`, {
       method: 'POST', body: JSON.stringify({ values: [row] }),
     });
   } else {
     // Overwrite row (idx+2 because row 1 is header, arrays are 0-based)
     const range = `Pacientes!A${idx + 2}:G${idx + 2}`;
-    await request(`${BASE}/${id}/values/${encodeURIComponent(range)}?valueInputOption=RAW`, {
+    return request(`${BASE}/${id}/values/${encodeURIComponent(range)}?valueInputOption=RAW`, {
       method: 'PUT', body: JSON.stringify({ values: [row] }),
     });
   }

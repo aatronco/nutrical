@@ -1,10 +1,17 @@
 // js/views/patients.js
-import { getPatients, savePatient, saveSpreadsheetId, validateSpreadsheet } from '../sheets.js';
+import { getPatients, savePatient, saveSpreadsheetId, validateSpreadsheet, createSpreadsheet } from '../sheets.js';
 import { calcularEdad } from '../formulas.js';
 
 export async function renderPatients() {
-  const spreadsheetId = localStorage.getItem('spreadsheet_id');
-  if (!spreadsheetId) return renderSetup();
+  let spreadsheetId = localStorage.getItem('spreadsheet_id');
+
+  if (!spreadsheetId) {
+    // Auto-create on first login — show loading state immediately
+    return `<div id="auto-creating" style="text-align:center;padding:80px 0;color:var(--muted)">
+      <div style="font-size:14px;margin-bottom:8px">Creando tu hoja de Google…</div>
+      <div style="font-size:12px;color:var(--muted-2)">Solo toma un momento</div>
+    </div>`;
+  }
 
   const patients = await getPatients();
 
@@ -40,6 +47,12 @@ export async function renderPatients() {
     <div id="patient-list">
       ${patients.length === 0 ? '<p style="color:var(--muted);text-align:center;padding:40px 0">Sin pacientes aún.</p>' : patients.map(renderPatientCard).join('')}
     </div>
+
+    <div style="margin-top:40px;text-align:center">
+      <button id="change-sheet-btn" style="background:none;border:none;font-size:12px;color:var(--muted-2);cursor:pointer;font-family:var(--font)">
+        Usar otra hoja de Google
+      </button>
+    </div>
   `;
 }
 
@@ -61,41 +74,56 @@ function renderPatientCard(p) {
   `;
 }
 
-function renderSetup() {
-  return `
-    <div style="max-width:500px;margin:60px auto">
-      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px">Configura tu hoja de Google</h2>
-      <p style="color:var(--muted);margin-bottom:20px;font-size:14px">
-        Crea una hoja de cálculo de Google con dos pestañas llamadas <strong>Pacientes</strong> y <strong>Consultas</strong>,
-        luego pega el ID aquí (es la parte de la URL entre /spreadsheets/d/ y /edit).
+function renderChangeSheet() {
+  document.getElementById('main').innerHTML = `
+    <div style="max-width:480px;margin:60px auto">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:8px">Usar otra hoja</h2>
+      <p style="color:var(--muted);margin-bottom:20px;font-size:13px">
+        Pega el ID de una hoja existente (la parte de la URL entre /spreadsheets/d/ y /edit).
       </p>
-      <div class="field"><label>ID de la hoja de Google</label><input id="sheet-id-input" type="text" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"></div>
-      <button class="btn btn-primary mt-16" id="sheet-id-save">Conectar</button>
+      <div class="field"><label>ID de la hoja</label><input id="sheet-id-input" type="text" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"></div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn btn-primary" id="sheet-id-save">Conectar</button>
+        <button class="btn btn-secondary" id="sheet-id-cancel">Cancelar</button>
+      </div>
       <div id="sheet-id-error" style="color:#b91c1c;font-size:13px;margin-top:8px;display:none"></div>
     </div>
   `;
+
+  document.getElementById('sheet-id-cancel').addEventListener('click', () => {
+    location.hash = '#/patients';
+  });
+
+  document.getElementById('sheet-id-save').addEventListener('click', async () => {
+    const input = document.getElementById('sheet-id-input').value.trim();
+    const errEl = document.getElementById('sheet-id-error');
+    if (!input) return;
+    const btn = document.getElementById('sheet-id-save');
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+    saveSpreadsheetId(input);
+    const ok = await validateSpreadsheet(input);
+    if (ok) {
+      location.hash = '#/patients';
+      location.reload();
+    } else {
+      errEl.style.display = 'block';
+      errEl.textContent = 'No se pudo acceder a la hoja. Verifica el ID y los permisos.';
+      btn.disabled = false;
+      btn.textContent = 'Conectar';
+    }
+  });
 }
 
 export function bindPatients() {
-  // Setup flow
-  const saveIdBtn = document.getElementById('sheet-id-save');
-  if (saveIdBtn) {
-    saveIdBtn.addEventListener('click', async () => {
-      const input = document.getElementById('sheet-id-input').value.trim();
-      const errEl = document.getElementById('sheet-id-error');
-      if (!input) return;
-      saveIdBtn.disabled = true;
-      saveIdBtn.textContent = 'Verificando...';
-      saveSpreadsheetId(input);
-      const ok = await validateSpreadsheet(input);
-      if (ok) {
-        location.hash = '#/patients';
+  // Auto-create flow
+  if (document.getElementById('auto-creating')) {
+    createSpreadsheet().then(id => {
+      if (id) {
         location.reload();
       } else {
-        errEl.style.display = 'block';
-        errEl.textContent = 'No se pudo acceder a la hoja. Verifica el ID y que esté compartida con tu cuenta de Google.';
-        saveIdBtn.disabled = false;
-        saveIdBtn.textContent = 'Conectar';
+        document.getElementById('auto-creating').innerHTML =
+          '<p style="color:#b91c1c;font-size:14px">No se pudo crear la hoja. Recarga e intenta de nuevo.</p>';
       }
     });
     return;
@@ -112,6 +140,9 @@ export function bindPatients() {
   document.getElementById('np-save-btn')?.addEventListener('click', async () => {
     const nombre = document.getElementById('np-nombre').value.trim();
     if (!nombre) return;
+    const btn = document.getElementById('np-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
     const patient = {
       id:               crypto.randomUUID(),
       nombre,
@@ -121,8 +152,13 @@ export function bindPatients() {
       recreacion:       document.getElementById('np-recreacion').value,
       created_at:       new Date().toISOString(),
     };
-    await savePatient(patient);
-    location.hash = `#/patients/${patient.id}`;
+    const result = await savePatient(patient);
+    if (result !== null) {
+      location.hash = `#/patients/${patient.id}`;
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Guardar';
+    }
   });
 
   // Search filter
@@ -133,4 +169,7 @@ export function bindPatients() {
       card.style.display = name.includes(q) ? '' : 'none';
     });
   });
+
+  // Change sheet
+  document.getElementById('change-sheet-btn')?.addEventListener('click', renderChangeSheet);
 }
