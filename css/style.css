@@ -1,0 +1,170 @@
+:root {
+  --bg:        #fafaf9;
+  --surface:   #ffffff;
+  --text:      #1c1917;
+  --muted:     #78716c;
+  --border:    #e7e5e4;
+  --accent:    #1c1917;
+  --radius:    8px;
+  --font:      system-ui, -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+#app { min-height: 100vh; }
+
+/* Top nav */
+#topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--text);
+  color: #fff;
+}
+#topnav .brand { font-weight: 600; font-size: 16px; letter-spacing: -0.3px; }
+#topnav button { background: none; border: 1px solid rgba(255,255,255,.3);
+  color: #fff; padding: 4px 12px; border-radius: var(--radius); cursor: pointer; font-size: 13px; }
+
+/* Main container */
+#main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+/* Breadcrumb */
+.breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.breadcrumb a { color: var(--muted); text-decoration: none; }
+.breadcrumb a:hover { color: var(--text); }
+.breadcrumb span { margin: 0 6px; }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font);
+  transition: opacity .15s;
+}
+.btn:hover { opacity: .85; }
+.btn-primary { background: var(--text); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-sm { padding: 5px 12px; font-size: 13px; }
+
+/* Form fields */
+.field-group { margin-bottom: 24px; }
+.field-group h3 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+.field input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font);
+  background: var(--surface);
+}
+.field input:focus { outline: 2px solid var(--text); outline-offset: 1px; }
+
+/* Jump anchors bar */
+.anchors {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.anchors a { font-size: 13px; color: var(--muted); text-decoration: none; padding: 2px 8px; border-radius: 4px; }
+.anchors a:hover { background: var(--border); color: var(--text); }
+
+/* Results block */
+.results-block {
+  background: var(--text);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 24px;
+}
+.results-block h3 { font-size: 13px; letter-spacing: .5px; color: rgba(255,255,255,.6); margin-bottom: 14px; text-transform: uppercase; }
+.results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; }
+.result-item .value { font-size: 22px; font-weight: 700; }
+.result-item .label { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 2px; }
+
+/* Expandable scientific explanation */
+.science-toggle { font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; margin-top: 10px; display: inline-block; }
+.science-toggle:hover { color: rgba(255,255,255,.8); }
+.science-panel { display: none; margin-top: 10px; padding: 12px; background: rgba(255,255,255,.05); border-radius: 6px; font-size: 12px; color: rgba(255,255,255,.7); line-height: 1.6; }
+.science-panel.open { display: block; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { text-align: left; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); border-bottom: 2px solid var(--border); }
+.data-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Consultation cards grid */
+.consult-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.consult-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+  transition: border-color .15s;
+}
+.consult-card:hover { border-color: var(--text); }
+.consult-card.active { border: 2px solid var(--text); }
+.consult-card .cn { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.consult-card .date { font-size: 12px; margin-top: 4px; }
+.consult-card .stats { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.consult-card.empty { border-style: dashed; color: var(--muted); }
+
+/* Search input */
+.search-wrap { position: relative; margin-bottom: 20px; }
+.search-wrap input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; font-family: var(--font); background: var(--surface); }
+
+/* Utilities */
+.hidden { display: none !important; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+
+/* Toast notification */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff; padding: 10px 20px; border-radius: var(--radius);
+  font-size: 14px; z-index: 1000; animation: fadein .2s;
+}
+.toast.error { background: #b91c1c; }
+@keyframes fadein { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
