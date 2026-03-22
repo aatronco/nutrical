@@ -89,13 +89,21 @@ test('calcularMasaResidual: known inputs → scoreZ≈0.801, kg≈6.425', () => 
 });
 
 // ── Masa Ósea ────────────────────────────────────────────────────────────────
-test('calcularMasaOsea: returns kg_cabeza, kg_cuerpo, kg_total', () => {
+// HEAD: scoreZ=(55-56)/1.44=-0.6944  kg=(-0.6944*0.18)+1.2=1.075
+// BODY: suma=37+28+11.6+16.4=93, ratio=170.18/165=1.0314
+//       scoreZ=(93*1.0314-98.88)/5.33=-0.5554
+//       kg=((-0.5554*1.34)+6.7)/1.0314^3=5.428
+// total=1.075+5.428=6.503
+test('calcularMasaOsea: kg_cabeza≈1.075, kg_cuerpo≈5.428, kg_total≈6.503', () => {
   const diametros  = { biacromial: 37, biliocrestideo: 28, humeral: 5.8, femoral: 8.2 };
   const perimetros = { cabeza: 55 };
   const result = calcularMasaOsea(diametros, perimetros, 165);
   assert.ok(result.kg_cabeza > 0);
   assert.ok(result.kg_cuerpo > 0);
   assert.ok(near(result.kg_total, result.kg_cabeza + result.kg_cuerpo));
+  assert.ok(near(result.kg_cabeza, 1.075), `kg_cabeza got ${result.kg_cabeza}`);
+  assert.ok(near(result.kg_cuerpo, 5.428), `kg_cuerpo got ${result.kg_cuerpo}`);
+  assert.ok(near(result.kg_total, 6.503),  `kg_total got ${result.kg_total}`);
 });
 
 // ── ajustarMasas ─────────────────────────────────────────────────────────────
