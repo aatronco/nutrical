@@ -61,6 +61,9 @@ export function bindWorkout(sessionKey) {
   const session = SESSIONS[sessionKey];
   if (!session || session.readonly) return;
 
+  // Clean up any active timer from previous session
+  if (activeTimer) { activeTimer.stop(); activeTimer = null; }
+
   // Rest timer on set rows
   document.querySelectorAll('[data-rest]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -80,18 +83,23 @@ export function bindWorkout(sessionKey) {
       const startDate = localStorage.getItem('gzclp_program_start') || new Date().toISOString().slice(0,10);
       const week      = getCurrentWeek(startDate);
       const phase     = getPhaseForWeek(week);
-      await saveSession({
-        date: new Date().toISOString().slice(0,10),
-        session: sessionKey,
-        week,
-        phase: phase.name,
-        completed: true,
-        sets: [],
-      });
-      completeBtn.textContent = '✓ ¡Sesión guardada!';
-      completeBtn.style.background = 'var(--mint)';
-      completeBtn.style.color = '#0a2010';
-      completeBtn.disabled = true;
+      try {
+        await saveSession({
+          date: new Date().toISOString().slice(0,10),
+          session: sessionKey,
+          week,
+          phase: phase.name,
+          completed: true,
+          sets: [],
+        });
+        completeBtn.textContent = '✓ ¡Sesión guardada!';
+        completeBtn.style.background = 'var(--mint)';
+        completeBtn.style.color = '#0a2010';
+        completeBtn.disabled = true;
+      } catch (err) {
+        completeBtn.textContent = 'Error al guardar';
+        completeBtn.disabled = false;
+      }
     });
   }
 }
@@ -213,7 +221,7 @@ function renderKine(session) {
             ${e.video ? '<span style="background:var(--cyan);color:#001020;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;">VIDEO</span>' : ''}
           </div>
           <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-            <b style="color:var(--text)">${e.load}</b> · ${e.reps ?? (e.sets + '×' + e.reps)} · ${e.rest || 0}"
+            <b style="color:var(--text)">${e.load}</b> · ${e.reps ?? '—'} · ${e.rest || 0}"
           </div>
         </div>
       `).join('')}
@@ -222,7 +230,7 @@ function renderKine(session) {
         <div class="session-card">
           <div class="session-card__title">${e.num}. ${e.name}</div>
           <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-            <b style="color:var(--text)">${e.load}</b> · ${e.reps ?? (e.sets + '×' + e.reps)} · ${e.rest || 0}"
+            <b style="color:var(--text)">${e.load}</b> · ${e.reps ?? '—'} · ${e.rest || 0}"
           </div>
           ${e.note ? `<div style="font-size:12px;color:#ddb0ff;margin-top:5px;">${e.note}</div>` : ''}
         </div>
