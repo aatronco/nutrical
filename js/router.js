@@ -1,15 +1,20 @@
 // js/router.js
-import { isLoggedIn } from './auth.js';
-import { renderLogin, bindLogin }                   from './views/login.js';
-import { renderPatients, bindPatients }             from './views/patients.js';
-import { renderPatientDetail, bindPatientDetail }   from './views/patient-detail.js';
-import { renderConsultation, bindConsultation }     from './views/consultation.js';
-import { renderReport, bindReport }                 from './views/report.js';
+import { isLoggedIn }                                   from './auth.js';
+import { renderLogin, bindLogin }                       from './views/login.js';
+import { renderPatients, bindPatients }                 from './views/patients.js';
+import { renderPatientDetail, bindPatientDetail }       from './views/patient-detail.js';
+import { renderConsultation, bindConsultation }         from './views/consultation.js';
+import { renderReport, bindReport }                     from './views/report.js';
+import { renderDashboard, bindDashboard }               from './views/dashboard.js';
+import { renderWorkout, bindWorkout }                   from './views/workout.js';
 
-const main = () => document.getElementById('main');
-const nav  = () => document.getElementById('topnav');
+const main    = () => document.getElementById('main');
+const nav     = () => document.getElementById('topnav');
+const bottomNav = () => document.getElementById('bottom-nav');
 
-function renderNav(patientName) {
+const WORKOUT_ROUTES = ['dashboard', 'workout', 'nutrition', 'mobility', 'progress'];
+
+function renderTopNav(patientName) {
   const n = nav();
   n.classList.remove('hidden');
   n.innerHTML = `
@@ -22,51 +27,96 @@ function renderNav(patientName) {
   });
 }
 
-async function route() {
-  const hash = location.hash || '#/login';
+function renderBottomNav(active) {
+  const bn = bottomNav();
+  if (!bn) return;
+  const tabs = [
+    { key: 'dashboard',  label: 'Inicio',    icon: '🏠', href: '#/dashboard' },
+    { key: 'workout',    label: 'Entrena',   icon: '💪', href: '#/workout/S1' },
+    { key: 'nutrition',  label: 'Nutrición', icon: '🥗', href: '#/nutrition' },
+    { key: 'mobility',   label: 'Movilidad', icon: '🧘', href: '#/mobility' },
+    { key: 'progress',   label: 'Progreso',  icon: '📈', href: '#/progress' },
+  ];
+  bn.innerHTML = `<nav class="bottom-nav">${tabs.map(t => `
+    <a href="${t.href}" class="bottom-nav__item ${t.key === active ? 'bottom-nav__item--active' : ''}">
+      <span class="icon">${t.icon}</span>${t.label}
+    </a>`).join('')}</nav>`;
+}
 
-  if (!isLoggedIn() && hash !== '#/login') {
+function hideBottomNav() {
+  const bn = bottomNav();
+  if (bn) bn.innerHTML = '';
+}
+
+async function route() {
+  const hash  = location.hash || '#/login';
+  const parts = hash.replace('#/', '').split('/');
+  const root  = parts[0];
+
+  if (!isLoggedIn() && root !== 'login') {
     location.hash = '#/login';
     return;
   }
 
-  const parts = hash.replace('#/', '').split('/');
-
-  if (parts[0] === 'login' || !isLoggedIn()) {
+  // Login
+  if (root === 'login' || !isLoggedIn()) {
+    hideBottomNav();
     main().innerHTML = renderLogin();
     bindLogin();
     return;
   }
 
-  if (parts[0] === 'patients' && !parts[1]) {
-    renderNav();
+  // Workout app routes
+  if (root === 'dashboard') {
+    nav().classList.add('hidden');
+    renderBottomNav('dashboard');
+    main().innerHTML = renderDashboard();
+    bindDashboard();
+    return;
+  }
+
+  if (root === 'workout' && parts[1]) {
+    nav().classList.add('hidden');
+    renderBottomNav('workout');
+    main().innerHTML = renderWorkout(parts[1]);
+    bindWorkout(parts[1]);
+    return;
+  }
+
+  // Nutrical legacy routes
+  if (root === 'patients' && !parts[1]) {
+    hideBottomNav();
+    renderTopNav();
     main().innerHTML = await renderPatients();
     bindPatients();
     return;
   }
 
-  if (parts[0] === 'patients' && parts[1] && !parts[2]) {
-    renderNav();
+  if (root === 'patients' && parts[1] && !parts[2]) {
+    hideBottomNav();
+    renderTopNav();
     main().innerHTML = await renderPatientDetail(parts[1]);
     await bindPatientDetail(parts[1]);
     return;
   }
 
-  if (parts[0] === 'patients' && parts[2] === 'c' && parts[3]) {
-    renderNav();
+  if (root === 'patients' && parts[2] === 'c' && parts[3]) {
+    hideBottomNav();
+    renderTopNav();
     main().innerHTML = await renderConsultation(parts[1], parseInt(parts[3]));
     bindConsultation(parts[1], parseInt(parts[3]));
     return;
   }
 
-  if (parts[0] === 'patients' && parts[2] === 'report') {
-    renderNav();
+  if (root === 'patients' && parts[2] === 'report') {
+    hideBottomNav();
+    renderTopNav();
     main().innerHTML = await renderReport(parts[1]);
     bindReport(parts[1]);
     return;
   }
 
-  location.hash = '#/patients';
+  location.hash = '#/dashboard';
 }
 
 export function initRouter() {
