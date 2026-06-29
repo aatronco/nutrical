@@ -23,6 +23,25 @@
   --glow-purple: 0 0 8px #aa00ff, 0 0 24px rgba(170,0,255,.3);
 }
 
+/* ── Override nutrical vars that conflict with dark theme ── */
+:root {
+  --surface:   #0d0d22;
+  --surface-2: #12122e;
+  --surface-3: #16163a;
+  --muted:     #4a5588;
+  --muted-2:   #2e3566;
+  --border-2:  #1e1e52;
+  --accent:    var(--cyan);
+}
+
+/* Override nutrical btn-primary (uses var(--text) as bg → white-on-white in dark) */
+.btn-primary {
+  background: var(--cyan) !important;
+  color: #080812 !important;
+  box-shadow: 0 0 12px rgba(0,229,255,.3);
+}
+.btn-primary:hover { opacity: .9 !important; box-shadow: 0 0 20px rgba(0,229,255,.5); }
+
 /* ── Layout ── */
 body {
   background: var(--bg);
