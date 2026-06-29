@@ -1,0 +1,154 @@
+/* css/app.css — Workout PWA extensions */
+
+:root {
+  --bg:     #0f0820;
+  --card:   #1a1030;
+  --card2:  #221440;
+  --border: #4a2080;
+  --text:   #f0e8ff;
+  --dim:    #c0b0e0;
+  --pink:   #ff4d94;
+  --orange: #ff8c50;
+  --gold:   #ffd54f;
+  --mint:   #4dffb8;
+  --cyan:   #4dd8ff;
+  --purple: #cc88ff;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Layout ── */
+body { padding-bottom: calc(64px + var(--safe-bottom)); }
+
+/* ── Bottom navigation ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  background: rgba(15,8,32,.97);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-bottom);
+  z-index: 200;
+}
+.bottom-nav__item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 4px 8px;
+  font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  color: var(--dim);
+  text-decoration: none;
+  border: none; background: none; cursor: pointer;
+  text-transform: uppercase;
+  transition: color .15s;
+}
+.bottom-nav__item .icon { font-size: 20px; margin-bottom: 3px; }
+.bottom-nav__item--active { color: var(--purple); }
+
+/* ── Session card ── */
+.session-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.session-card__title {
+  font-size: 15px; font-weight: 800; color: var(--text);
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ── Set table ── */
+.set-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+.set-table th {
+  text-align: left; padding: 6px 5px;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--dim); border-bottom: 1px solid var(--border);
+}
+.set-table td { padding: 7px 5px; border-bottom: 1px solid rgba(255,255,255,.05); color: var(--text); }
+.set-table tr:last-child td { border-bottom: none; }
+.set-row--work td  { color: var(--gold); font-weight: 700; }
+.set-row--pr td    { color: var(--pink); font-weight: 800; font-size: 14px; }
+.set-row--done td  { opacity: .5; text-decoration: line-through; }
+
+/* ── Progress bar ── */
+.progress-bar {
+  height: 10px; border-radius: 5px;
+  background: var(--card2); overflow: hidden; margin: 6px 0;
+}
+.progress-bar__fill {
+  height: 100%; border-radius: 5px;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  transition: width .4s ease;
+}
+.progress-bar__fill--success { background: linear-gradient(90deg, var(--mint), var(--cyan)); }
+
+/* ── Rest timer overlay ── */
+.timer-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(15,8,32,.97);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px;
+}
+.timer-overlay__time {
+  font-family: Georgia, serif;
+  font-size: clamp(72px, 20vw, 96px);
+  font-weight: 800; color: var(--text);
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.timer-overlay__label { font-size: 13px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; }
+.timer-overlay__skip {
+  margin-top: 20px;
+  padding: 12px 32px; border-radius: 30px;
+  border: 1.5px solid var(--border); background: var(--card);
+  color: var(--dim); font-size: 14px; font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Badges ── */
+.badge-kine {
+  display: inline-block; padding: 4px 12px; border-radius: 10px;
+  background: rgba(77,216,255,.15); border: 1px solid var(--cyan);
+  color: var(--cyan); font-size: 10px; font-weight: 800; letter-spacing: 1px;
+}
+.pill-obligatorio {
+  display: inline-block; padding: 2px 8px; border-radius: 6px;
+  background: rgba(255,77,148,.15); border: 1px solid var(--pink);
+  color: var(--pink); font-size: 9px; font-weight: 800;
+}
+.pill-new {
+  background: var(--mint); color: #0a2010;
+  font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 8px;
+}
+
+/* ── Phase banner ── */
+.phase-banner {
+  padding: 10px 14px; border-radius: 10px;
+  font-size: 13px; font-weight: 800;
+  margin: 16px 0 10px;
+}
+.phase-banner--pink   { background: rgba(255,77,148,.15); border: 1px solid rgba(255,77,148,.4); color: var(--pink); }
+.phase-banner--mint   { background: rgba(77,255,184,.12); border: 1px solid rgba(77,255,184,.35); color: var(--mint); }
+.phase-banner--gold   { background: rgba(255,213,79,.12); border: 1px solid rgba(255,213,79,.35); color: var(--gold); }
+.phase-banner--cyan   { background: rgba(77,216,255,.12); border: 1px solid rgba(77,216,255,.35); color: var(--cyan); }
+.phase-banner--purple { background: rgba(204,136,255,.12); border: 1px solid rgba(204,136,255,.35); color: var(--purple); }
+
+/* ── Tip box ── */
+.tip-box {
+  background: #0d0820; border: 2px solid var(--gold);
+  border-radius: 12px; padding: 13px 14px; margin: 10px 0;
+}
+.tip-box__title { font-size: 13px; font-weight: 800; color: var(--gold); margin-bottom: 6px; }
+.tip-box ul { padding-left: 16px; }
+.tip-box li { font-size: 13px; color: var(--text); margin-bottom: 5px; line-height: 1.45; }
+
+/* ── EVA warning ── */
+.eva-warning {
+  background: rgba(255,77,148,.1); border: 1.5px solid var(--pink);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 13px; font-weight: 700; color: var(--pink);
+  margin-bottom: 12px;
+}
