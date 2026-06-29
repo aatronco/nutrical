@@ -1,0 +1,10 @@
+{
+  "name": "workout-app",
+  "version": "1.0.0",
+  "description": "Personal workout + nutrition PWA — GZCLP v6",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": { "node": ">=18" }
+}
