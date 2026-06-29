@@ -4,8 +4,8 @@
   "description": "GZCLP v6 — entrenamiento y nutrición",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f0820",
-  "theme_color": "#0f0820",
+  "background_color": "#080812",
+  "theme_color": "#080812",
   "start_url": "/#/dashboard",
   "lang": "es",
   "icons": [
