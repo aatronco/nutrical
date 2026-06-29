@@ -1,7 +1,7 @@
 {
-  "name": "workout-app",
+  "name": "brute",
   "version": "1.0.0",
-  "description": "Personal workout + nutrition PWA — GZCLP v6",
+  "description": "Brute — GZCLP v6 workout + nutrition PWA",
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js"
