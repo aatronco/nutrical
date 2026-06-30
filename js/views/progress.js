@@ -152,15 +152,15 @@ export function renderProgress() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div>
           <div style="font-size:14px;font-weight:800;color:var(--cyan)">🏔️ Sentadilla (Back Squat)</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:2px">Sesión S2/S4 — carga por RPE, sin objetivos semanales fijos</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">S2 back squat · S4 front squat · carga por RPE</div>
         </div>
         ${squatPR ? `<div style="text-align:center">
           <div style="font-size:22px;font-weight:800;color:var(--cyan)">${squatPR} kg</div>
-          <div style="font-size:9px;color:var(--dim)">PR actual</div>
+          <div style="font-size:9px;color:var(--dim)">PR back squat</div>
         </div>` : `<div style="font-size:11px;color:var(--dim)">Sin PR registrado</div>`}
       </div>
       <div style="font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:10px">
-        Back squat PR · Front squat se usa en S2/S4 como trabajo de cuádriceps · Progresa cuando @7 o menos
+        S2 back squat 3×8 · S4 front squat 3×8 · Progresa cuando se siente @7 o menos
       </div>
     </div>`;
 

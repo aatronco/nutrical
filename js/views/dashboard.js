@@ -205,7 +205,7 @@ function gzclpInfo() {
             combinado con un protocolo de rehabilitación de rodilla activa.
           </div>
           ${[
-            ['Sentadilla frontal 2×/semana', 'S2 y S4 incluyen front squat (back bar) como movimiento de cuádriceps dominante. La frecuencia doble genera suficiente estímulo para hipertrofia de cuádriceps que el programa original no cubre.'],
+            ['Sentadilla 2×/semana', 'S2 usa back squat y S4 usa front squat como movimientos de cuádriceps dominante. La variación entre sesiones desarrolla patrones motores complementarios; la frecuencia doble genera el volumen de cuádriceps que el GZCLP estándar no cubre.'],
             ['Protocolo rodilla integrado',   'Los días S2/S4 combinan trabajo de cuádriceps con ejercicios de estabilización de rodilla (pogos búlgaros, high step, pistol asistido). Permite progresar fuerza sin agravar patologías previas de rodilla.'],
             ['T2 de banca en S3',             'El press banca aparece como T2 en la sesión de tirón, aumentando la frecuencia de empuje horizontal a 2×/semana sin añadir días de entrenamiento extra.'],
           ].map(r => row(r, 'var(--purple)')).join('')}
