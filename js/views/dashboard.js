@@ -80,6 +80,8 @@ export function renderDashboard() {
         </a>
       </div>
 
+      ${gzclpInfo()}
+
       <!-- Add athlete modal (hidden) -->
       <div id="add-athlete-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;padding:40px 16px;overflow-y:auto">
         <div style="max-width:380px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px">
@@ -116,7 +118,102 @@ export function renderDashboard() {
   `;
 }
 
+function gzclpInfo() {
+  const PRO = [
+    ['Estructura en 3 niveles',  'T1 (fuerza máxima) → T2 (hipertrofia) → T3 (aislamiento). Cada sesión trabaja las tres adaptaciones simultáneamente, sin que compitan entre sí por intensidad.'],
+    ['Progresión lineal simple', 'El peso sube semana a semana basado en porcentajes del PR. No hay que pensar — el programa decide la carga. Ideal para consolidar la técnica bajo fatiga acumulada.'],
+    ['Autoregulado',             'Las semanas de Peak PR son optativos (OPT-IN). Si el cuerpo no está listo, se omite el intento y se vuelve a acumular. Reduce el riesgo de lesión por ego.'],
+    ['Alta frecuencia de press', 'Banca aparece en S1 y como T2 en S3. La frecuencia 2×/semana con volúmenes distintos acelera la adaptación neuromotora en patrones de empuje.'],
+  ];
+  const CON = [
+    ['Poco volumen de pierna',   'Deadlift y sentadilla se trabajan en S5 y S2 respectivamente con baja frecuencia semanal. Para hipertrofia de cuádriceps puede ser insuficiente sin T2/T3 complementarios.'],
+    ['No es un programa de hipertrofia pura', 'El foco en T1 pesado reduce el volumen total. Si el objetivo es volumen máximo de músculo, bloques de hipertrofia dedicados son más eficientes.'],
+    ['Requiere historial de PRs', 'Los porcentajes de carga se calculan desde un 1RM conocido. Sin datos previos sólidos, las primeras semanas pueden ser demasiado conservadoras o agresivas.'],
+    ['Mesociclo corto (6 sem)',  'Un pico de 6 semanas no da margen para corregir una semana mala de sueño, estrés o lesión menor. Un bloque de 8-12 semanas sería más robusto para la mayoría.'],
+  ];
+
+  const row = ([title, text], color) => `
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <div style="flex-shrink:0;margin-top:3px;width:6px;height:6px;border-radius:50%;background:${color};box-shadow:0 0 6px ${color}"></div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${title}</div>
+        <div style="font-size:11px;color:var(--dim);line-height:1.55">${text}</div>
+      </div>
+    </div>`;
+
+  return `
+    <div style="margin-top:20px;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <button id="gzclp-toggle" style="width:100%;background:transparent;border:none;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;text-align:left">
+        <div>
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:3px">MÉTODO</div>
+          <div style="font-size:14px;font-weight:800;color:var(--cyan);font-family:'Orbitron',sans-serif;letter-spacing:.05em">¿Qué es GZCLP?</div>
+        </div>
+        <span id="gzclp-arrow" style="font-size:18px;color:var(--dim);transition:transform .2s">▸</span>
+      </button>
+
+      <div id="gzclp-body" style="display:none;padding:0 16px 20px">
+
+        <!-- Origen -->
+        <div style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;font-family:'JetBrains Mono',monospace">ORIGEN</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:8px">
+            <strong style="color:var(--cyan)">GZCL</strong> son las iniciales de <strong>Cody Lefever</strong> (usuario <em>u/gzcl</em> en Reddit), soldado del ejército estadounidense y powerlifter de élite.
+            Desarrolló el <strong>Método GZCL</strong> (~2012) mientras entrenaba en condiciones de despliegue militar, donde el acceso al gimnasio era irregular y necesitaba un sistema adaptable y eficiente.
+          </div>
+          <div style="font-size:12px;color:var(--text);line-height:1.6">
+            <strong style="color:var(--cyan)">GZCLP</strong> = <strong>GZCL Linear Progression</strong>. Es la versión de progresión lineal del método, diseñada para el rango <em>intermedio-avanzado</em>: atletas que ya superaron los programas de novato (5×5, StrongLifts) pero que aún no requieren periodización compleja por bloques.
+          </div>
+        </div>
+
+        <!-- Estructura -->
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;font-family:'JetBrains Mono',monospace">ESTRUCTURA DE TIERS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:rgba(255,0,128,.08);border:1px solid rgba(255,0,128,.2);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:16px;font-weight:900;color:var(--pink);font-family:'Orbitron',sans-serif">T1</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Fuerza máxima<br>1–5 reps<br>85–100% 1RM</div>
+            </div>
+            <div style="background:rgba(0,255,159,.08);border:1px solid rgba(0,255,159,.2);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:16px;font-weight:900;color:var(--mint);font-family:'Orbitron',sans-serif">T2</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Hipertrofia<br>8–12 reps<br>65–80% 1RM</div>
+            </div>
+            <div style="background:rgba(255,230,0,.08);border:1px solid rgba(255,230,0,.2);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:16px;font-weight:900;color:var(--gold);font-family:'Orbitron',sans-serif">T3</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Aislamiento<br>15–25 reps<br>40–60% 1RM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ventajas -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mint);margin-bottom:10px;font-family:'JetBrains Mono',monospace">✓ VENTAJAS</div>
+          ${PRO.map(r => row(r,'var(--mint)')).join('')}
+        </div>
+
+        <!-- Desventajas -->
+        <div style="margin-bottom:4px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);margin-bottom:10px;font-family:'JetBrains Mono',monospace">✗ LIMITACIONES</div>
+          ${CON.map(r => row(r,'var(--pink)')).join('')}
+        </div>
+
+        <div style="font-size:10px;color:rgba(255,255,255,.2);text-align:right;margin-top:12px;font-family:'JetBrains Mono',monospace">
+          Fuente: u/gzcl · reddit.com/r/gzcl · Lefever (2014) <em>GZCL Method</em>
+        </div>
+      </div>
+    </div>`;
+}
+
 export function bindDashboard() {
+  // GZCLP info toggle
+  document.getElementById('gzclp-toggle')?.addEventListener('click', () => {
+    const body  = document.getElementById('gzclp-body');
+    const arrow = document.getElementById('gzclp-arrow');
+    const open  = body.style.display === 'none';
+    body.style.display  = open ? 'block' : 'none';
+    arrow.textContent   = open ? '▾' : '▸';
+    arrow.style.transform = open ? 'rotate(0deg)' : '';
+  });
+
   // Athlete switcher
   document.querySelectorAll('[data-switch]').forEach(btn => {
     btn.addEventListener('click', () => {
