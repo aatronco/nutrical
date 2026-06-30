@@ -4,6 +4,10 @@ import { getAthletes, getActiveAthlete, getActiveAthleteId, setActiveAthlete,
          saveAthlete, deleteAthlete, getAthletePRs, setAthletePRs,
          getAthleteProgramStart, setAthleteProgramStart } from '../athletes.js';
 
+function esc(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 export function renderDashboard() {
   const athlete   = getActiveAthlete();
   const startDate = getAthleteProgramStart(athlete.id);
@@ -19,7 +23,7 @@ export function renderDashboard() {
                  background:${a.id===athlete.id?'rgba(0,212,255,.12)':'transparent'};
                  color:${a.id===athlete.id?'var(--cyan)':'var(--dim)'};
                  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">
-          ${a.icon||'🏋️'} ${a.name}
+          ${esc(a.icon||'🏋️')} ${esc(a.name)}
         </button>`).join('')}
       <button id="add-athlete-btn"
         style="padding:6px 14px;border-radius:20px;border:1px dashed var(--border);background:transparent;color:var(--dim);font-size:12px;cursor:pointer">
@@ -39,7 +43,7 @@ export function renderDashboard() {
 
       <div class="hero" style="border-radius:14px;margin-bottom:16px;">
         <div class="hero-eyebrow">▸ PRIDE EDITION ▸</div>
-        <h1>${athlete.icon||'🏋️'} ${athlete.name} — S${week}/6</h1>
+        <h1>${esc(athlete.icon||'🏋️')} ${esc(athlete.name)} — S${week}/6</h1>
         <p class="hero-sub">GZCLP v6 — ${phaseLabel(week)}</p>
       </div>
 

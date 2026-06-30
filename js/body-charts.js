@@ -13,6 +13,7 @@ function catmullRomPath(pts) {
   return d+'Z';
 }
 const MONO = 'font-family="JetBrains Mono, monospace"';
+const esc = str => String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 // ── Reference profiles ────────────────────────────────────────────────────────
 const STD_SKIN = { bic:8,   tri:14,  sub:16, sup:16, ili:20, abd:25, mus:17, pan:13 };
@@ -55,7 +56,7 @@ export function renderSkinfoldSVG(c, patientName = 'Paciente') {
   const profiles=[
     {d:STD_SKIN,color:'#00d4ff',stroke:1.5,dash:'5,4',fill:'none',label:'E',fullLabel:'ESTÁNDAR'},
     {d:POW_SKIN,color:'#ffe600',stroke:1.5,dash:'',   fill:'none',label:'P',fullLabel:'POWERLIFTER'},
-    {d:pat,     color:'#00ff9f',stroke:2.5,dash:'',   fill:'rgba(0,255,159,.06)',label:'A',fullLabel:patientName.toUpperCase()},
+    {d:pat,     color:'#00ff9f',stroke:2.5,dash:'',   fill:'rgba(0,255,159,.06)',label:'A',fullLabel:esc(patientName).toUpperCase()},
   ];
 
   let s=`<defs><filter id="gsk" x="-60%" y="-60%" width="220%" height="220%">
@@ -159,7 +160,7 @@ export function renderDiameterSVG(c, patientName = 'Paciente') {
   const profiles=[
     {d:STD_DIAM,color:'#00d4ff',stroke:1.5,dash:'5,4',fill:'none',label:'E',fullLabel:'ESTÁNDAR'},
     {d:POW_DIAM,color:'#ffe600',stroke:1.5,dash:'',   fill:'none',label:'P',fullLabel:'POWERLIFTER'},
-    {d:pat,     color:'#00ff9f',stroke:2.5,dash:'',   fill:'rgba(0,255,159,.06)',label:'A',fullLabel:patientName.toUpperCase()},
+    {d:pat,     color:'#00ff9f',stroke:2.5,dash:'',   fill:'rgba(0,255,159,.06)',label:'A',fullLabel:esc(patientName).toUpperCase()},
   ];
 
   let s=`<defs><filter id="gdi" x="-60%" y="-60%" width="220%" height="220%">

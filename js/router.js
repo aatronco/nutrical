@@ -29,22 +29,6 @@ function renderTopNav(patientName) {
   });
 }
 
-function renderBottomNav(active) {
-  const bn = bottomNav();
-  if (!bn) return;
-  const tabs = [
-    { key: 'dashboard',  label: 'Inicio',    icon: '🏠', href: '#/dashboard' },
-    { key: 'workout',    label: 'Entrena',   icon: '💪', href: '#/workout/S1' },
-    { key: 'nutrition',  label: 'Nutrición', icon: '🥗', href: '#/nutrition' },
-    { key: 'mobility',   label: 'Movilidad', icon: '🧘', href: '#/mobility' },
-    { key: 'progress',   label: 'Progreso',  icon: '📈', href: '#/progress' },
-  ];
-  bn.innerHTML = `<nav class="bottom-nav">${tabs.map(t => `
-    <a href="${t.href}" class="bottom-nav__item ${t.key === active ? 'bottom-nav__item--active' : ''}">
-      <span class="icon">${t.icon}</span>${t.label}
-    </a>`).join('')}</nav>`;
-}
-
 function hideBottomNav() {
   const bn = bottomNav();
   if (bn) bn.innerHTML = '';
@@ -80,7 +64,7 @@ async function route() {
   // Workout app routes
   if (root === 'dashboard') {
     nav().classList.add('hidden');
-    renderBottomNav('dashboard');
+    hideBottomNav();
     main().innerHTML = renderDashboard();
     bindDashboard();
     return;
@@ -88,7 +72,7 @@ async function route() {
 
   if (root === 'workout' && parts[1]) {
     nav().classList.add('hidden');
-    renderBottomNav('workout');
+    hideBottomNav();
     main().innerHTML = renderWorkout(parts[1]);
     bindWorkout(parts[1]);
     return;
@@ -96,7 +80,7 @@ async function route() {
 
   if (root === 'progress') {
     nav().classList.add('hidden');
-    renderBottomNav('progress');
+    hideBottomNav();
     main().innerHTML = renderProgress();
     bindProgress();
     return;
