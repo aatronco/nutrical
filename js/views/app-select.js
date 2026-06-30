@@ -5,6 +5,59 @@ export function renderAppSelect() {
   const bn = document.getElementById('bottom-nav');
   if (bn) bn.innerHTML = '';
 
+  const apps = [
+    {
+      id:       'app-ejercicio',
+      href:     '#/dashboard',
+      color:    'var(--mint)',
+      glow:     'rgba(0,255,159,.6)',
+      glowHover:'rgba(0,255,159,.2)',
+      fillHover:'rgba(0,255,159,.05)',
+      name:     'EJERCICIO',
+      sub:      'GZCLP v6 // ENTRENAMIENTO DE FUERZA',
+    },
+    {
+      id:       'app-nutricion',
+      href:     '#/patients',
+      color:    'var(--cyan)',
+      glow:     'rgba(0,212,255,.6)',
+      glowHover:'rgba(0,212,255,.2)',
+      fillHover:'rgba(0,212,255,.05)',
+      name:     'NUTRICIÓN',
+      sub:      'COMPOSICIÓN CORPORAL // CLÍNICA',
+    },
+    {
+      id:       'app-progreso',
+      href:     '#/progress',
+      color:    'var(--purple)',
+      glow:     'rgba(160,100,255,.6)',
+      glowHover:'rgba(160,100,255,.2)',
+      fillHover:'rgba(160,100,255,.05)',
+      name:     'PROGRESO',
+      sub:      'PRs // EVOLUCIÓN // ESTADÍSTICAS',
+    },
+  ];
+
+  const cards = apps.map(a => `
+    <a href="${a.href}" style="
+      display:block; text-decoration:none;
+      background:var(--card); border:1px solid ${a.color};
+      padding:24px; position:relative;
+      transition:box-shadow .2s, background .2s;
+    " id="${a.id}">
+      <div style="position:absolute;top:-1px;left:-1px;width:10px;height:10px;border-top:2px solid ${a.color};border-left:2px solid ${a.color};"></div>
+      <div style="position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-bottom:2px solid ${a.color};border-right:2px solid ${a.color};"></div>
+      <div style="
+        font-family:'Orbitron',sans-serif; font-weight:900;
+        font-size:28px; letter-spacing:.1em; color:${a.color};
+        text-shadow:0 0 16px ${a.glow}; margin-bottom:6px;
+      ">${a.name}</div>
+      <div style="
+        font-family:'JetBrains Mono',monospace;
+        font-size:10px; color:var(--dim); letter-spacing:.08em;
+      ">${a.sub}</div>
+    </a>`).join('');
+
   return `
     <div style="
       display:flex; flex-direction:column; align-items:center;
@@ -14,95 +67,26 @@ export function renderAppSelect() {
       <p style="
         font-family:'JetBrains Mono',monospace;
         font-size:10px; letter-spacing:.25em; color:var(--dim);
-        text-transform:uppercase; margin-bottom:48px;
-      ">> SELECT APPLICATION</p>
+        text-transform:uppercase; margin-bottom:40px;
+      ">> SELECCIONAR MÓDULO</p>
 
-      <div style="display:flex; flex-direction:column; gap:16px; width:100%; max-width:340px;">
-
-        <!-- BRUTE -->
-        <a href="#/dashboard" style="
-          display:block; text-decoration:none;
-          background:var(--card); border:1px solid var(--mint);
-          padding:28px 24px; position:relative;
-          transition:box-shadow .2s, background .2s;
-        " id="app-brute">
-          <div style="
-            position:absolute; top:-1px; left:-1px;
-            width:10px; height:10px;
-            border-top:2px solid var(--mint); border-left:2px solid var(--mint);
-          "></div>
-          <div style="
-            position:absolute; bottom:-1px; right:-1px;
-            width:10px; height:10px;
-            border-bottom:2px solid var(--mint); border-right:2px solid var(--mint);
-          "></div>
-          <div style="
-            font-family:'Orbitron',sans-serif; font-weight:900;
-            font-size:32px; letter-spacing:.1em;
-            color:var(--mint);
-            text-shadow: 0 0 16px rgba(0,255,159,.6);
-            margin-bottom:8px;
-          ">BRUTE</div>
-          <div style="
-            font-family:'JetBrains Mono',monospace;
-            font-size:11px; color:var(--dim); letter-spacing:.08em;
-          ">GZCLP v6 // ENTRENAMIENTO</div>
-        </a>
-
-        <!-- NUTRICAL -->
-        <a href="#/patients" style="
-          display:block; text-decoration:none;
-          background:var(--card); border:1px solid var(--cyan);
-          padding:28px 24px; position:relative;
-          transition:box-shadow .2s, background .2s;
-        " id="app-nutrical">
-          <div style="
-            position:absolute; top:-1px; left:-1px;
-            width:10px; height:10px;
-            border-top:2px solid var(--cyan); border-left:2px solid var(--cyan);
-          "></div>
-          <div style="
-            position:absolute; bottom:-1px; right:-1px;
-            width:10px; height:10px;
-            border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan);
-          "></div>
-          <div style="
-            font-family:'Orbitron',sans-serif; font-weight:900;
-            font-size:32px; letter-spacing:.1em;
-            color:var(--cyan);
-            text-shadow: 0 0 16px rgba(0,212,255,.6);
-            margin-bottom:8px;
-          ">NUTRICAL</div>
-          <div style="
-            font-family:'JetBrains Mono',monospace;
-            font-size:11px; color:var(--dim); letter-spacing:.08em;
-          ">COMPOSICIÓN CORPORAL // CLÍNICA</div>
-        </a>
-
+      <div style="display:flex; flex-direction:column; gap:14px; width:100%; max-width:340px;">
+        ${cards}
       </div>
     </div>
   `;
 }
 
 export function bindAppSelect() {
-  const brute = document.getElementById('app-brute');
-  const nutrical = document.getElementById('app-nutrical');
-
-  brute?.addEventListener('mouseenter', () => {
-    brute.style.background = 'rgba(0,255,159,.05)';
-    brute.style.boxShadow = '0 0 24px rgba(0,255,159,.2)';
-  });
-  brute?.addEventListener('mouseleave', () => {
-    brute.style.background = 'var(--card)';
-    brute.style.boxShadow = 'none';
-  });
-
-  nutrical?.addEventListener('mouseenter', () => {
-    nutrical.style.background = 'rgba(0,212,255,.05)';
-    nutrical.style.boxShadow = '0 0 24px rgba(0,212,255,.2)';
-  });
-  nutrical?.addEventListener('mouseleave', () => {
-    nutrical.style.background = 'var(--card)';
-    nutrical.style.boxShadow = 'none';
+  const hovers = [
+    { id:'app-ejercicio', fill:'rgba(0,255,159,.05)',  shadow:'0 0 24px rgba(0,255,159,.2)' },
+    { id:'app-nutricion', fill:'rgba(0,212,255,.05)',  shadow:'0 0 24px rgba(0,212,255,.2)' },
+    { id:'app-progreso',  fill:'rgba(160,100,255,.05)',shadow:'0 0 24px rgba(160,100,255,.2)' },
+  ];
+  hovers.forEach(({ id, fill, shadow }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('mouseenter', () => { el.style.background = fill; el.style.boxShadow = shadow; });
+    el.addEventListener('mouseleave', () => { el.style.background = 'var(--card)'; el.style.boxShadow = 'none'; });
   });
 }
