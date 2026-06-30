@@ -5,7 +5,7 @@
 
 export const PHASES = [
   { weeks: [1,2], name: 'volumen',         label: 'Volumen',        color: 'pink',   t2Sets: '4-5×10-12', t3Rest: 75 },
-  { weeks: [3,4], name: 'acumulacion',     label: 'Acumulación',    color: 'orange', t2Sets: '3-4×8-10',  t3Rest: 90 },
+  { weeks: [3,4], name: 'intensificacion_prog', label: 'Intens. Progresiva', color: 'orange', t2Sets: '3-4×8-10', t3Rest: 90 },
   { weeks: [5],   name: 'intensificacion', label: 'Intensificación',color: 'gold',   t2Sets: '3×8-10',    t3Rest: 90 },
   { weeks: [6],   name: 'peak_pr',         label: 'Peak PR ★',      color: 'purple', t2Sets: '2×8',       t3Rest: 0  },
 ];
@@ -78,8 +78,8 @@ export const S1 = {
         warmup: [],
         work: [
           { label: 'Intento 1', reps: 1, kg: 119, rest: 300, type: 'pr', note: '95% — sólido y rápido' },
-          { label: 'Intento 2', reps: 1, kg: 123, rest: 300, type: 'pr', note: '98% — solo si intento 1 limpio' },
-          { label: 'PR ★',      reps: 1, kg: 127, rest: 0,   type: 'pr', note: '125–129 kg' },
+          { label: 'Intento 2', reps: 1, kg: 124, rest: 300, type: 'pr', note: '99% — solo si intento 1 limpio' },
+          { label: 'PR ★',      reps: 1, kg: 129, rest: 0,   type: 'pr', note: '127–131 kg' },
         ],
       },
     },
@@ -134,8 +134,8 @@ export const S3 = {
     frente1: {
       label: 'Frente 1 — Fuerza',
       warmup: { name: 'Escapulares', reps: 10, rest: 30, type: 'warmup' },
-      description: '5 series al fallo controlado. Para cuando la velocidad baja.',
-      sets: 5, rest: 180, type: 'bodyweight',
+      description: '5 series al fallo controlado (sem 1-4) / 3 series sem 5-6 — calidad sobre cantidad.',
+      sets: 5, setsByWeek: { 5: 3, 6: 3 }, rest: 180, type: 'bodyweight',
     },
     frente2: {
       label: 'Frente 2 — Volumen Asistido',
@@ -213,14 +213,14 @@ export const S5 = {
       3: {
         warmup: [],
         work: [
-          { label: 'Top ×3', reps: 3, kg: 150, rest: 270, type: 'work', note: '3×3' },
+          { label: 'Top ×5', reps: 5, kg: 145, rest: 240, type: 'work', note: 'Transición — técnica sólida' },
         ],
       },
       4: {
         warmup: [],
         work: [
-          { label: 'Top ×3', reps: 3, kg: 155, rest: 270, type: 'work', note: '3×3' },
-          { label: 'Backoff', reps: 5, kg: 135, rest: 180, type: 'work', note: '2×5' },
+          { label: 'Top ×3', reps: 3, kg: 152, rest: 270, type: 'work', note: '3×3' },
+          { label: 'Backoff', reps: 5, kg: 132, rest: 180, type: 'work', note: '2×5' },
         ],
       },
       5: {
@@ -232,8 +232,8 @@ export const S5 = {
       6: {
         warmup: [],
         work: [
-          { label: 'Intento 1', reps: 1, kg: 170, rest: 300, type: 'pr', note: 'Rápido y limpio' },
-          { label: 'Intento 2', reps: 1, kg: 175, rest: 300, type: 'pr', note: 'Solo si intento 1 impecable' },
+          { label: 'Intento 1', reps: 1, kg: 170, rest: 300, type: 'pr', note: 'OPT-IN — evalúa rodilla antes. Rápido y limpio.' },
+          { label: 'Intento 2', reps: 1, kg: 175, rest: 300, type: 'pr', note: 'Solo si intento 1 impecable y rodilla OK' },
           { label: 'PR ★',      reps: 1, kg: 180, rest: 0,   type: 'pr', note: '178–182 kg ★' },
         ],
       },

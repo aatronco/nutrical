@@ -28,7 +28,7 @@ export function renderWorkout(sessionKey) {
         <span class="dot" style="background:var(--${session.color})"></span>T1 — ${session.T1.exercise}
       </h2>
       ${t1Sets.length === 0 && session.T1.frente1
-          ? renderT1Frentes(session.T1)
+          ? renderT1Frentes(session.T1, week)
           : renderT1Table(t1Sets)}
 
       <h2 class="sh" style="margin-top:18px;">
@@ -146,15 +146,16 @@ function renderT1Table(sets) {
   `;
 }
 
-function renderT1Frentes(t1) {
+function renderT1Frentes(t1, week) {
   const { frente1, frente2 } = t1;
   const fmtRest = s => (s >= 60 && s % 60 === 0) ? `${s / 60} min` : `${s} s`;
   const f2Reps  = Array.isArray(frente2.reps) ? frente2.reps.join('-') : frente2.reps;
+  const f1Sets  = frente1.setsByWeek?.[week] ?? frente1.sets;
   return `
     <div class="session-card">
       <div class="session-card__title">${frente1.label}</div>
       <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-        <b style="color:var(--text)">${frente1.sets} series al fallo controlado</b> · descanso ${fmtRest(frente1.rest)}
+        <b style="color:var(--text)">${f1Sets} series al fallo controlado</b> · descanso ${fmtRest(frente1.rest)}
         <button data-rest="${frente1.rest}" style="background:var(--purple);border:none;border-radius:8px;padding:4px 10px;color:#fff;font-size:11px;cursor:pointer;margin-left:8px;">▶</button>
       </div>
     </div>
