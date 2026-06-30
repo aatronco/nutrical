@@ -1,0 +1,293 @@
+<meta charset="UTF-8">
+<title>Siluetas Corporales — Pliegues</title>
+<meta name="description" content="Siluetas corporales superpuestas generadas a partir de pliegues cutáneos: Estándar, Powerlifter, Alejandro.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'JetBrains Mono',monospace;
+  background:#070711;color:#c8d8e8;
+  padding:28px 16px 48px;min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);
+  pointer-events:none;z-index:9998;
+}
+.wrap{max-width:820px;margin:0 auto;position:relative;z-index:1}
+.eyebrow{font-size:10px;letter-spacing:.3em;color:#4a5578;text-transform:uppercase;margin-bottom:10px}
+h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(16px,3.5vw,24px);letter-spacing:.06em;color:#fff;margin-bottom:6px}
+.subtitle{font-size:11px;color:#4a5578;margin-bottom:28px}
+
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ldot{width:28px;height:3px;border-radius:0}
+
+.chart-wrap{
+  display:flex;justify-content:center;
+  background:#0a0a1a;border:1px solid #1a1a3e;
+  padding:24px 12px;margin-bottom:32px;position:relative;
+}
+
+.divider{height:1px;background:linear-gradient(90deg,transparent,#1a1a3e,transparent);margin:24px 0}
+.section-label{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#4a5578;margin-bottom:14px}
+
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{border-bottom:1px solid #1a1a3e}
+th{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5578;padding:9px 10px;text-align:left}
+th.r{text-align:right}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04)}
+tbody tr:hover{background:rgba(0,212,255,.03)}
+td{padding:11px 10px;vertical-align:middle}
+.site-name{font-size:11px;font-weight:700;color:#c8d8e8;margin-bottom:2px}
+.site-zone{font-size:8px;color:#4a5578;letter-spacing:.1em;text-transform:uppercase}
+.bars{display:flex;flex-direction:column;gap:4px}
+.bar-row2{display:flex;align-items:center;gap:6px}
+.blabel{font-size:8px;color:#4a5578;width:12px;text-align:right;flex-shrink:0}
+.btrack{flex:1;height:5px;background:rgba(255,255,255,.05)}
+.bfill{height:100%}
+.bval{font-size:9px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+.bfill-s{background:#00d4ff;box-shadow:0 0 4px rgba(0,212,255,.5)}
+.bfill-p{background:#ffe600;box-shadow:0 0 4px rgba(255,230,0,.5)}
+.bfill-a{background:#00ff9f;box-shadow:0 0 4px rgba(0,255,159,.5)}
+.bval-s{color:#00d4ff}.bval-p{color:#ffe600}.bval-a{color:#00ff9f}
+.delta-cell{text-align:right;min-width:72px}
+.delta{font-size:9px;font-weight:700;padding:2px 7px;border:1px solid;display:inline-block}
+.d-hi{color:#ff0080;border-color:rgba(255,0,128,.4);background:rgba(255,0,128,.07)}
+.d-lo{color:#00ff9f;border-color:rgba(0,255,159,.4);background:rgba(0,255,159,.07)}
+.d-eq{color:#4a5578;border-color:rgba(74,85,120,.3)}
+@media(max-width:500px){.delta-cell{display:none}}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">NUTRICAL // COMPOSICIÓN CORPORAL</div>
+  <h1>SILUETAS CORPORALES — PLIEGUES CUTÁNEOS</h1>
+  <div class="subtitle">Curvas superpuestas · Forma generada a partir de medidas reales · Hombre, 40 años, 185 cm</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:#00d4ff;box-shadow:0 0 4px rgba(0,212,255,.6)"></div>Estándar</div>
+    <div class="legend-item"><div class="ldot" style="background:#ffe600;box-shadow:0 0 4px rgba(255,230,0,.6)"></div>Powerlifter</div>
+    <div class="legend-item"><div class="ldot" style="background:#00ff9f;box-shadow:0 0 4px rgba(0,255,159,.6)"></div>Alejandro</div>
+  </div>
+
+  <div class="chart-wrap">
+    <svg id="overlay-svg"></svg>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">◈ Detalle por Sitio Anatómico</div>
+  <table>
+    <thead><tr>
+      <th>Sitio</th><th>Comparativa</th><th class="r">vs Powerlifter</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+// ── Centripetal Catmull-Rom → closed SVG path ────────────────────────────────
+function catmullRomPath(pts) {
+  const p = [pts[pts.length-1], ...pts, pts[0], pts[1]];
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i=1; i<p.length-2; i++) {
+    const [x0,y0]=p[i-1],[x1,y1]=p[i],[x2,y2]=p[i+1],[x3,y3]=p[i+2];
+    d+=` C${(x1+(x2-x0)/6).toFixed(1)},${(y1+(y2-y0)/6).toFixed(1)},${(x2-(x3-x1)/6).toFixed(1)},${(y2-(y3-y1)/6).toFixed(1)},${x2.toFixed(1)},${y2.toFixed(1)}`;
+  }
+  return d+'Z';
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag,a={}) => { const e=document.createElementNS(NS,tag); Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v)); return e; };
+
+// ── Data ─────────────────────────────────────────────────────────────────────
+const PROFILES = [
+  { id:'std', label:'ESTÁNDAR',    color:'#00d4ff', fill:'none', stroke:1.5, dash:'6,4',   d:{bic:8,   tri:14,  sub:16,   sup:16,   ili:20,   abd:25,  mus:17,  pan:13  } },
+  { id:'pow', label:'POWERLIFTER', color:'#ffe600', fill:'none', stroke:1.5, dash:'',      d:{bic:11,  tri:20,  sub:23,   sup:24,   ili:30,   abd:36,  mus:22,  pan:16  } },
+  { id:'pat', label:'ALEJANDRO',   color:'#00ff9f', fill:'rgba(0,255,159,.05)', stroke:2.5, dash:'', d:{bic:9, tri:13.5,sub:22.5, sup:25.5, ili:35.5, abd:41,  mus:8,   pan:9.5 } },
+];
+
+// ── Body geometry ─────────────────────────────────────────────────────────────
+const BH=460, BW=360, CX=180;
+const HEAD_R=24, HEAD_Y=32, NECK_TOP=HEAD_Y+HEAD_R+2;
+
+// Base widths are small → skinfold multipliers dominate → big visual differences
+const STATIONS = [
+  { yf:0.00, hw:d=> 12 },
+  { yf:0.04, hw:d=> 15 },
+  { yf:0.12, hw:d=> 50 + d.sub*0.35 },                       // hombros: estructura > grasa
+  { yf:0.22, hw:d=> 32 + d.sub*0.35 + (d.tri+d.bic)*0.42 }, // pecho/brazo
+  { yf:0.33, hw:d=> 16 + d.sup*1.30 },                       // cintura alta — muy sensible
+  { yf:0.42, hw:d=> 14 + d.sup*1.10 + d.ili*0.50 },          // cintura baja
+  { yf:0.52, hw:d=> 10 + d.ili*1.50 },                       // cresta ilíaca — muy sensible
+  { yf:0.60, hw:d=>  8 + d.abd*1.20 + d.ili*0.30 },          // abdomen — máxima sensibilidad
+  { yf:0.67, hw:d=> 12 + d.ili*1.00 + d.abd*0.30 },          // cadera baja
+  { yf:0.74, hw:d=>  8 + d.mus*2.00 },                       // muslo — muy sensible
+  { yf:0.83, hw:d=>  6 + d.mus*1.20 },                       // muslo medio
+  { yf:0.88, hw:d=> 14 },                                     // rodilla (fija)
+  { yf:0.93, hw:d=>  6 + d.pan*1.30 },                       // pantorrilla
+  { yf:1.00, hw:d=>  8 },                                     // tobillo (fijo)
+];
+
+function bodyPath(data, cx) {
+  const bH = BH - NECK_TOP - 8;
+  const right = STATIONS.map(s => [cx + s.hw(data), NECK_TOP + s.yf*bH]);
+  const left  = [...STATIONS].reverse().map(s => [cx - s.hw(data), NECK_TOP + s.yf*bH]);
+  return catmullRomPath([...right, ...left]);
+}
+
+// ── Build overlay SVG ─────────────────────────────────────────────────────────
+// Widen canvas so annotation panel has room
+const BW_NEW=560, CX_NEW=175;
+
+const svg = document.getElementById('overlay-svg');
+svg.setAttribute('width', BW_NEW);
+svg.setAttribute('height', BH);
+svg.setAttribute('viewBox', `0 0 ${BW_NEW} ${BH}`);
+
+const defs = mk('defs'); svg.appendChild(defs);
+const flt = mk('filter',{id:'glow',x:'-60%',y:'-60%',width:'220%',height:'220%'});
+const gb = mk('feGaussianBlur',{stdDeviation:'3',result:'b'}); flt.appendChild(gb);
+const fm = mk('feMerge'); flt.appendChild(fm);
+fm.appendChild(mk('feMergeNode',{in:'b'}));
+fm.appendChild(mk('feMergeNode',{in:'SourceGraphic'}));
+defs.appendChild(flt);
+
+// Add short-label and fullLabel to profiles for legend
+PROFILES[0].shortLabel='E'; PROFILES[0].fullLabel='ESTÁNDAR';
+PROFILES[1].shortLabel='P'; PROFILES[1].fullLabel='POWERLIFTER';
+PROFILES[2].shortLabel='A'; PROFILES[2].fullLabel='ALEJANDRO';
+
+['pow','std','pat'].forEach(id => {
+  const p = PROFILES.find(x=>x.id===id);
+  const dashAttr = p.dash ? {'stroke-dasharray':p.dash} : {};
+  svg.appendChild(mk('circle',{cx:CX_NEW,cy:HEAD_Y,r:HEAD_R,fill:p.fill,stroke:p.color,'stroke-width':p.stroke,filter:'url(#glow)',...dashAttr}));
+  [-1,1].forEach(s => svg.appendChild(mk('ellipse',{cx:CX_NEW+s*(HEAD_R-2),cy:HEAD_Y+5,rx:5,ry:7,fill:p.fill,stroke:p.color,'stroke-width':p.stroke*.7,...dashAttr})));
+  const sy = NECK_TOP + 0.12*(BH-NECK_TOP-8);
+  const ay = NECK_TOP + 0.30*(BH-NECK_TOP-8);
+  const aW = 10 + (p.d.tri+p.d.bic)*0.22;
+  const aH = ay - sy + 12;
+  [-1,1].forEach(s => {
+    const ax = CX_NEW + s*(48 + p.d.sub*0.52 + aW*0.42);
+    svg.appendChild(mk('ellipse',{cx:ax,cy:sy+aH*.45,rx:aW,ry:aH*.55,fill:p.fill,stroke:p.color,'stroke-width':p.stroke*.8,...dashAttr}));
+  });
+  // Recalculate bodyPath with new CX
+  const bHx = BH - NECK_TOP - 8;
+  const right2 = STATIONS.map(s => [CX_NEW + s.hw(p.d), NECK_TOP + s.yf*bHx]);
+  const left2  = [...STATIONS].reverse().map(s => [CX_NEW - s.hw(p.d), NECK_TOP + s.yf*bHx]);
+  svg.appendChild(mk('path',{d:catmullRomPath([...right2,...left2]),fill:p.fill,stroke:p.color,'stroke-width':p.stroke,filter:'url(#glow)',...dashAttr}));
+});
+
+// ── Annotation panel ──────────────────────────────────────────────────────────
+const MONO = {'font-family':'JetBrains Mono, monospace'};
+const txt2 = (content,attrs) => { const e=mk('text',attrs); e.textContent=content; return e; };
+
+const AX      = 290;    // panel left edge
+const PLBL_W  = 12;
+const BAR_X   = AX + PLBL_W + 3;
+const BAR_W   = 82;
+const MAX_SF  = 50;
+const VAL_X   = BAR_X + BAR_W + 5;
+const ROW_H   = 9;
+const SLBL_H  = 8;
+const ZLBL_H  = 11;
+const ITEM_GAP= 5;
+
+// Three zones sized to not overlap
+const ANNOT_ZONES = [
+  { yf:0.15, label:'HOMBROS  ·  BRAZO', items:[
+    {k:'sub', sublabel:'Sub (espalda)'  },
+    {k:'tri', sublabel:'Tri (brazo)'    },
+  ]},
+  { yf:0.52, label:'CINTURA  ·  ABDOMEN', items:[
+    {k:'sup', sublabel:'Supraespinal' },
+    {k:'ili', sublabel:'Suprailiaco'  },
+    {k:'abd', sublabel:'Abdominal'    },
+  ]},
+  { yf:0.82, label:'PIERNA', items:[
+    {k:'mus', sublabel:'Muslo medio' },
+    {k:'pan', sublabel:'Pantorrilla' },
+  ]},
+];
+
+function itemBlockH(){ return SLBL_H + 3*ROW_H; }
+function zoneBlockH(zone){ return ZLBL_H + zone.items.length*itemBlockH() + (zone.items.length-1)*ITEM_GAP; }
+
+const bH2 = BH - NECK_TOP - 8;
+
+ANNOT_ZONES.forEach(zone => {
+  const zoneY = NECK_TOP + zone.yf * bH2;
+  const bH = zoneBlockH(zone);
+  let y = zoneY - bH/2;
+
+  // Guide line
+  const gl = mk('line',{x1:8,y1:zoneY,x2:AX-6,y2:zoneY,
+    stroke:'rgba(255,255,255,.07)','stroke-width':1,'stroke-dasharray':'3,4'});
+  svg.insertBefore(gl, svg.firstChild);
+
+  // Zone label
+  svg.appendChild(txt2(zone.label,{x:AX,y:y+ZLBL_H-2,'text-anchor':'start',
+    fill:'rgba(255,255,255,.30)','font-size':8,'letter-spacing':'.12em',...MONO}));
+  y += ZLBL_H + 2;
+
+  zone.items.forEach((item, si) => {
+    if(si>0) y += ITEM_GAP;
+    svg.appendChild(txt2(item.sublabel,{x:AX,y:y+SLBL_H-3,'text-anchor':'start',
+      fill:'rgba(255,255,255,.55)','font-size':9,'font-weight':'600',...MONO}));
+    y += SLBL_H;
+
+    PROFILES.forEach((prof, ki) => {
+      const val = prof.d[item.k];
+      const barW = (val / MAX_SF) * BAR_W;
+      const rowY = y + ki*ROW_H;
+      svg.appendChild(txt2(prof.shortLabel,{x:AX,y:rowY+ROW_H-3,'text-anchor':'start',
+        fill:prof.color,'font-size':9,'font-weight':'700',...MONO}));
+      svg.appendChild(mk('rect',{x:BAR_X,y:rowY+2,width:BAR_W,height:ROW_H-4,fill:'rgba(255,255,255,.04)'}));
+      svg.appendChild(mk('rect',{x:BAR_X,y:rowY+2,width:barW.toFixed(1),height:ROW_H-4,fill:prof.color,opacity:.7}));
+      svg.appendChild(txt2(`${val} mm`,{x:VAL_X,y:rowY+ROW_H-3,'text-anchor':'start',
+        fill:prof.color,'font-size':9,'font-weight':'700',...MONO}));
+    });
+    y += 3*ROW_H;
+  });
+});
+
+// Inset legend box
+const LEG_X=BW_NEW-5, LEG_Y=12, LEG_ROW=14;
+svg.appendChild(mk('rect',{x:LEG_X-112,y:LEG_Y-12,width:112,height:PROFILES.length*LEG_ROW+10,
+  fill:'rgba(10,10,26,.85)',stroke:'rgba(255,255,255,.08)','stroke-width':1}));
+PROFILES.forEach((p,i)=>{
+  const ly=LEG_Y+i*LEG_ROW;
+  svg.appendChild(mk('rect',{x:LEG_X-106,y:ly-2,width:18,height:3,fill:p.color}));
+  svg.appendChild(txt2(`${p.shortLabel} — ${p.fullLabel}`,{x:LEG_X-82,y:ly+1,'text-anchor':'start',
+    fill:'rgba(255,255,255,.7)','font-size':9,...MONO}));
+});
+
+// ── Detail table ──────────────────────────────────────────────────────────────
+const SITES = [
+  {name:'Bicipital',    zone:'Brazo anterior',  k:'bic'},
+  {name:'Tricipital',   zone:'Brazo posterior', k:'tri'},
+  {name:'Subescapular', zone:'Espalda alta',    k:'sub'},
+  {name:'Supraespinal', zone:'Torso lateral',   k:'sup'},
+  {name:'Suprailiaco',  zone:'Cadera',          k:'ili'},
+  {name:'Abdominal',    zone:'Abdomen',         k:'abd'},
+  {name:'Muslo medio',  zone:'Muslo anterior',  k:'mus'},
+  {name:'Pantorrilla',  zone:'Pierna medial',   k:'pan'},
+];
+const [std,pow,pat] = PROFILES;
+const MAX_V = 50;
+
+document.getElementById('tbody').innerHTML = SITES.map(s => {
+  const sv=std.d[s.k], pv=pow.d[s.k], av=pat.d[s.k];
+  const delta=av-pv;
+  const dl=Math.abs(delta)<1.5?'≈':(delta>0?`+${delta.toFixed(1)}`:delta.toFixed(1));
+  const dc=Math.abs(delta)<1.5?'d-eq':delta>0?'d-hi':'d-lo';
+  return `<tr>
+    <td><div class="site-name">${s.name}</div><div class="site-zone">${s.zone}</div></td>
+    <td><div class="bars">
+      <div class="bar-row2"><div class="blabel">E</div><div class="btrack"><div class="bfill bfill-s" style="width:${sv/MAX_V*100}%"></div></div><div class="bval bval-s">${sv} mm</div></div>
+      <div class="bar-row2"><div class="blabel">P</div><div class="btrack"><div class="bfill bfill-p" style="width:${pv/MAX_V*100}%"></div></div><div class="bval bval-p">${pv} mm</div></div>
+      <div class="bar-row2"><div class="blabel">A</div><div class="btrack"><div class="bfill bfill-a" style="width:${av/MAX_V*100}%"></div></div><div class="bval bval-a">${av} mm</div></div>
+    </div></td>
+    <td class="delta-cell"><span class="delta ${dc}">${dl} mm</span></td>
+  </tr>`;
+}).join('');
+</script>

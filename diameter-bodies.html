@@ -1,0 +1,254 @@
+<meta charset="UTF-8">
+<title>Siluetas Corporales — Diámetros Óseos</title>
+<meta name="description" content="Siluetas corporales superpuestas generadas a partir de diámetros óseos: Estándar, Powerlifter, Alejandro.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'JetBrains Mono',monospace;background:#070711;color:#c8d8e8;padding:28px 16px 48px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);pointer-events:none;z-index:9998}
+.wrap{max-width:920px;margin:0 auto;position:relative;z-index:1}
+.eyebrow{font-size:10px;letter-spacing:.3em;color:#4a5578;text-transform:uppercase;margin-bottom:10px}
+h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(16px,3.5vw,24px);letter-spacing:.06em;color:#fff;margin-bottom:6px}
+.subtitle{font-size:11px;color:#4a5578;margin-bottom:28px}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ldot{width:28px;height:3px}
+.chart-wrap{display:flex;justify-content:center;background:#0a0a1a;border:1px solid #1a1a3e;padding:24px 8px;margin-bottom:32px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#1a1a3e,transparent);margin:24px 0}
+.section-label{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#4a5578;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{border-bottom:1px solid #1a1a3e}
+th{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5578;padding:9px 10px;text-align:left}
+th.r{text-align:right}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04)}
+tbody tr:hover{background:rgba(0,212,255,.03)}
+td{padding:11px 10px;vertical-align:middle}
+.site-name{font-size:11px;font-weight:700;color:#c8d8e8;margin-bottom:2px}
+.site-zone{font-size:8px;color:#4a5578;letter-spacing:.1em;text-transform:uppercase}
+.bars{display:flex;flex-direction:column;gap:4px}
+.bar-row2{display:flex;align-items:center;gap:6px}
+.blabel{font-size:8px;color:#4a5578;width:12px;text-align:right;flex-shrink:0}
+.btrack{flex:1;height:5px;background:rgba(255,255,255,.05)}
+.bfill{height:100%}
+.bval{font-size:9px;font-weight:700;width:44px;text-align:right;flex-shrink:0}
+.bfill-s{background:#00d4ff;box-shadow:0 0 4px rgba(0,212,255,.5)}
+.bfill-p{background:#ffe600;box-shadow:0 0 4px rgba(255,230,0,.5)}
+.bfill-a{background:#00ff9f;box-shadow:0 0 4px rgba(0,255,159,.5)}
+.bval-s{color:#00d4ff}.bval-p{color:#ffe600}.bval-a{color:#00ff9f}
+.delta-cell{text-align:right;min-width:72px}
+.delta{font-size:9px;font-weight:700;padding:2px 7px;border:1px solid;display:inline-block}
+.d-hi{color:#00ff9f;border-color:rgba(0,255,159,.4);background:rgba(0,255,159,.07)}
+.d-lo{color:#ff0080;border-color:rgba(255,0,128,.4);background:rgba(255,0,128,.07)}
+.d-eq{color:#4a5578;border-color:rgba(74,85,120,.3)}
+@media(max-width:500px){.delta-cell{display:none}}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">NUTRICAL // COMPOSICIÓN CORPORAL</div>
+  <h1>SILUETAS CORPORALES — DIÁMETROS ÓSEOS</h1>
+  <div class="subtitle">Estructura músculo-esquelética · Forma definida por diámetros reales · Hombre, 40 años, 185 cm</div>
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:#00d4ff;box-shadow:0 0 4px rgba(0,212,255,.6)"></div>Estándar</div>
+    <div class="legend-item"><div class="ldot" style="background:#ffe600;box-shadow:0 0 4px rgba(255,230,0,.6)"></div>Powerlifter</div>
+    <div class="legend-item"><div class="ldot" style="background:#00ff9f;box-shadow:0 0 4px rgba(0,255,159,.6)"></div>Alejandro</div>
+  </div>
+  <div class="chart-wrap"><svg id="overlay-svg"></svg></div>
+  <div class="divider"></div>
+  <div class="section-label">◈ Detalle por Diámetro</div>
+  <table>
+    <thead><tr><th>Medida</th><th>Comparativa</th><th class="r">vs Powerlifter</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+function catmullRomPath(pts) {
+  const p = [pts[pts.length-1], ...pts, pts[0], pts[1]];
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i=1;i<p.length-2;i++){
+    const [x0,y0]=p[i-1],[x1,y1]=p[i],[x2,y2]=p[i+1],[x3,y3]=p[i+2];
+    d+=` C${(x1+(x2-x0)/6).toFixed(1)},${(y1+(y2-y0)/6).toFixed(1)},${(x2-(x3-x1)/6).toFixed(1)},${(y2-(y3-y1)/6).toFixed(1)},${x2.toFixed(1)},${y2.toFixed(1)}`;
+  }
+  return d+'Z';
+}
+const NS='http://www.w3.org/2000/svg';
+const mk=(tag,a={})=>{const e=document.createElementNS(NS,tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e};
+const txt=(content,attrs)=>{const e=mk('text',attrs);e.textContent=content;return e};
+
+const PROFILES=[
+  {id:'std',label:'E',fullLabel:'ESTÁNDAR',    color:'#00d4ff',fill:'none',              stroke:1.5,dash:'6,4',
+   d:{biac:42.0,biil:28.0,torxt:28.5,torxap:20.0,hum:7.0,fem:9.5}},
+  {id:'pow',label:'P',fullLabel:'POWERLIFTER', color:'#ffe600',fill:'none',              stroke:1.5,dash:'',
+   d:{biac:46.5,biil:31.0,torxt:33.0,torxap:25.0,hum:7.8,fem:10.5}},
+  {id:'pat',label:'A',fullLabel:'ALEJANDRO',   color:'#00ff9f',fill:'rgba(0,255,159,.05)',stroke:2.5,dash:'',
+   d:{biac:47.1,biil:31.6,torxt:32.2,torxap:24.5,hum:8.5,fem:10.9}},
+];
+
+// Canvas: body on left ~60%, annotation panel on right ~40%
+const BH=500, BW=560, CX=152;
+const HEAD_R=24,HEAD_Y=32,NECK_TOP=HEAD_Y+HEAD_R+2;
+const SCALE=5.0;
+
+const STATIONS=[
+  {yf:0.00,hw:d=>11},{yf:0.04,hw:d=>15},{yf:0.10,hw:d=>10},
+  {yf:0.16,hw:d=>d.biac/2*SCALE},
+  {yf:0.24,hw:d=>d.torxt/2*SCALE},
+  {yf:0.31,hw:d=>d.torxt/2*SCALE*0.86},
+  {yf:0.38,hw:d=>(d.biil*0.69)/2*SCALE},
+  {yf:0.45,hw:d=>d.biil/2*SCALE},
+  {yf:0.53,hw:d=>d.biil/2*SCALE*0.52},
+  {yf:0.64,hw:d=>d.fem*SCALE*0.73},
+  {yf:0.74,hw:d=>d.fem/2*SCALE*1.02},
+  {yf:0.82,hw:d=>d.fem/2*SCALE*0.84},
+  {yf:0.89,hw:d=>13},{yf:0.94,hw:d=>9},{yf:1.00,hw:d=>12},
+];
+
+function bodyPath(data){
+  const bH=BH-NECK_TOP-8;
+  const right=STATIONS.map(s=>[CX+s.hw(data),NECK_TOP+s.yf*bH]);
+  const left=[...STATIONS].reverse().map(s=>[CX-s.hw(data),NECK_TOP+s.yf*bH]);
+  return catmullRomPath([...right,...left]);
+}
+
+const svg=document.getElementById('overlay-svg');
+svg.setAttribute('width',BW);svg.setAttribute('height',BH);
+svg.setAttribute('viewBox',`0 0 ${BW} ${BH}`);
+
+const defs=mk('defs');svg.appendChild(defs);
+const flt=mk('filter',{id:'glow',x:'-60%',y:'-60%',width:'220%',height:'220%'});
+const gb=mk('feGaussianBlur',{stdDeviation:'3',result:'b'});flt.appendChild(gb);
+const fm=mk('feMerge');flt.appendChild(fm);
+fm.appendChild(mk('feMergeNode',{in:'b'}));fm.appendChild(mk('feMergeNode',{in:'SourceGraphic'}));
+defs.appendChild(flt);
+
+['pow','std','pat'].forEach(id=>{
+  const p=PROFILES.find(x=>x.id===id);
+  const da=p.dash?{'stroke-dasharray':p.dash}:{};
+  svg.appendChild(mk('circle',{cx:CX,cy:HEAD_Y,r:HEAD_R,fill:p.fill,stroke:p.color,'stroke-width':p.stroke,filter:'url(#glow)',...da}));
+  [-1,1].forEach(s=>svg.appendChild(mk('ellipse',{cx:CX+s*(HEAD_R-2),cy:HEAD_Y+5,rx:5,ry:7,fill:p.fill,stroke:p.color,'stroke-width':p.stroke*.7,...da})));
+  const shoulderHW=p.d.biac/2*SCALE;
+  const armW=p.d.hum*0.95+2.5;
+  const armTopY=NECK_TOP+0.16*(BH-NECK_TOP-8);
+  const armBotY=NECK_TOP+0.34*(BH-NECK_TOP-8);
+  const armH=(armBotY-armTopY)*0.58;
+  [-1,1].forEach(s=>{
+    const ax=CX+s*(shoulderHW+armW*0.35+3);
+    svg.appendChild(mk('ellipse',{cx:ax,cy:armTopY+armH*.9,rx:armW,ry:armH,fill:p.fill,stroke:p.color,'stroke-width':p.stroke*.8,...da}));
+  });
+  svg.appendChild(mk('path',{d:bodyPath(p.d),fill:p.fill,stroke:p.color,'stroke-width':p.stroke,filter:'url(#glow)',...da}));
+});
+
+// ── Annotation panel ──────────────────────────────────────────────────────────
+// Layout constants for the right-side panel
+const AX       = 285;   // panel left edge
+const PLBL_X   = AX;    // E/P/A letter x
+const PLBL_W   = 12;    // letter column width
+const BAR_X    = AX + PLBL_W + 3;  // bar left
+const BAR_W    = 82;    // max bar width
+const VAL_X    = BAR_X + BAR_W + 5; // value text x
+const ROW_H    = 12;    // row height
+const SLBL_H   = 11;    // sub-label height (measurement name)
+const ZLBL_H   = 14;    // zone label height
+const ITEM_GAP = 8;     // gap between items in same zone
+const MONOATTR = {'font-family':'JetBrains Mono, monospace'};
+
+// Two combined annotation zones
+const ANNOT_ZONES=[
+  {yf:0.22,label:'HOMBROS  ·  TÓRAX',items:[
+    {k:'biac',  sublabel:'Biac',  max:55},
+    {k:'torxt', sublabel:'T-T',   max:42},
+    {k:'torxap',sublabel:'T-AP',  max:32},
+  ]},
+  {yf:0.60,label:'CADERA  ·  HUESO',items:[
+    {k:'biil',sublabel:'Biil',max:38},
+    {k:'fem', sublabel:'Fem', max:13},
+    {k:'hum', sublabel:'Hum', max:10},
+  ]},
+];
+
+function itemH(){ return SLBL_H + 3*ROW_H; }
+function blockH(zone){ return ZLBL_H + zone.items.length*itemH() + (zone.items.length-1)*ITEM_GAP; }
+
+const bH2=BH-NECK_TOP-8;
+
+ANNOT_ZONES.forEach(zone=>{
+  const zoneY=NECK_TOP+zone.yf*bH2;
+  const bH=blockH(zone);
+  let y=zoneY-bH/2;
+
+  // Guide line at zone center (behind silhouettes)
+  const gl=mk('line',{x1:8,y1:zoneY,x2:AX-6,y2:zoneY,
+    stroke:'rgba(255,255,255,.07)','stroke-width':1,'stroke-dasharray':'3,4'});
+  svg.insertBefore(gl,svg.firstChild);
+
+  // Zone label
+  svg.appendChild(txt(zone.label,{x:AX,y:y+ZLBL_H-2,'text-anchor':'start',
+    fill:'rgba(255,255,255,.30)','font-size':8,'letter-spacing':'.12em',...MONOATTR}));
+  y+=ZLBL_H+2;
+
+  zone.items.forEach((item,si)=>{
+    if(si>0) y+=ITEM_GAP;
+
+    // Measurement sub-label
+    svg.appendChild(txt(item.sublabel,{x:AX,y:y+SLBL_H-3,'text-anchor':'start',
+      fill:'rgba(255,255,255,.55)','font-size':9,'font-weight':'600',...MONOATTR}));
+    y+=SLBL_H;
+
+    PROFILES.forEach((prof,ki)=>{
+      const val=prof.d[item.k];
+      const barW=(val/item.max)*BAR_W;
+      const rowY=y+ki*ROW_H;
+      // Profile letter
+      svg.appendChild(txt(prof.label,{x:PLBL_X,y:rowY+ROW_H-3,'text-anchor':'start',
+        fill:prof.color,'font-size':9,'font-weight':'700',...MONOATTR}));
+      // Bar bg
+      svg.appendChild(mk('rect',{x:BAR_X,y:rowY+2,width:BAR_W,height:ROW_H-4,
+        fill:'rgba(255,255,255,.04)'}));
+      // Bar fill
+      svg.appendChild(mk('rect',{x:BAR_X,y:rowY+2,width:barW.toFixed(1),height:ROW_H-4,
+        fill:prof.color,opacity:.7}));
+      // Value + unit
+      svg.appendChild(txt(`${val.toFixed(1)} cm`,{x:VAL_X,y:rowY+ROW_H-3,'text-anchor':'start',
+        fill:prof.color,'font-size':9,'font-weight':'700',...MONOATTR}));
+    });
+    y+=3*ROW_H;
+  });
+});
+
+// Small inset legend box (top-right corner of panel)
+const LEG_X=BW-5, LEG_Y=12, LEG_ROW=14;
+svg.appendChild(mk('rect',{x:LEG_X-108,y:LEG_Y-12,width:108,height:PROFILES.length*LEG_ROW+10,
+  fill:'rgba(10,10,26,.85)',stroke:'rgba(255,255,255,.08)','stroke-width':1}));
+PROFILES.forEach((p,i)=>{
+  const ly=LEG_Y+i*LEG_ROW;
+  svg.appendChild(mk('rect',{x:LEG_X-102,y:ly-2,width:18,height:3,fill:p.color}));
+  svg.appendChild(txt(`${p.label} — ${p.fullLabel}`,{x:LEG_X-78,y:ly+1,'text-anchor':'start',
+    fill:'rgba(255,255,255,.7)','font-size':9,...MONOATTR}));
+});
+
+// ── Detail table ──────────────────────────────────────────────────────────────
+const SITE_DEFS=[
+  {name:'Biacromial',          zone:'Ancho de hombros',       k:'biac',  unit:'cm',max:55},
+  {name:'Tórax Transverso',    zone:'Ancho de tórax',         k:'torxt', unit:'cm',max:42},
+  {name:'Tórax Anteroposterior',zone:'Profundidad de tórax',  k:'torxap',unit:'cm',max:32},
+  {name:'Biliocrestídeo',      zone:'Ancho de cadera',        k:'biil',  unit:'cm',max:38},
+  {name:'Diám. Humeral',       zone:'Codo (robustez ósea)',   k:'hum',   unit:'cm',max:10},
+  {name:'Diám. Femoral',       zone:'Rodilla (robustez ósea)',k:'fem',   unit:'cm',max:13},
+];
+const [std,pow,pat]=PROFILES;
+document.getElementById('tbody').innerHTML=SITE_DEFS.map(s=>{
+  const sv=std.d[s.k],pv=pow.d[s.k],av=pat.d[s.k];
+  const delta=(av-pv).toFixed(1);
+  const dl=Math.abs(delta)<0.3?'≈':(delta>0?`+${delta}`:String(delta));
+  const dc=Math.abs(delta)<0.3?'d-eq':delta>0?'d-hi':'d-lo';
+  return `<tr>
+    <td><div class="site-name">${s.name}</div><div class="site-zone">${s.zone}</div></td>
+    <td><div class="bars">
+      <div class="bar-row2"><div class="blabel">E</div><div class="btrack"><div class="bfill bfill-s" style="width:${sv/s.max*100}%"></div></div><div class="bval bval-s">${sv.toFixed(1)} cm</div></div>
+      <div class="bar-row2"><div class="blabel">P</div><div class="btrack"><div class="bfill bfill-p" style="width:${pv/s.max*100}%"></div></div><div class="bval bval-p">${pv.toFixed(1)} cm</div></div>
+      <div class="bar-row2"><div class="blabel">A</div><div class="btrack"><div class="bfill bfill-a" style="width:${av/s.max*100}%"></div></div><div class="bval bval-a">${av.toFixed(1)} cm</div></div>
+    </div></td>
+    <td class="delta-cell"><span class="delta ${dc}">${dl} cm</span></td>
+  </tr>`;
+}).join('');
+</script>

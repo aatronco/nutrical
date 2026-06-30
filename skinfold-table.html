@@ -1,0 +1,356 @@
+<meta charset="UTF-8">
+<title>Pliegues — Comparativa de Perfiles</title>
+<meta name="description" content="Tabla comparativa de pliegues cutáneos: Estándar, Powerlifter y paciente real, ordenados anatómicamente.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #070711;
+    color: #c8d8e8;
+    padding: 32px 20px 48px;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
+    pointer-events: none; z-index: 9998;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; position: relative; z-index: 1; }
+
+  .header { margin-bottom: 36px; }
+  .eyebrow {
+    font-size: 10px; letter-spacing: .3em; color: #4a5578;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 900; letter-spacing: .06em;
+    color: #fff; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 11px; color: #4a5578; letter-spacing: .05em; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    color: #c8d8e8;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Table */
+  .skinfold-table { width: 100%; border-collapse: collapse; }
+
+  .skinfold-table thead tr {
+    border-bottom: 1px solid #1a1a3e;
+  }
+  .skinfold-table th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: #4a5578;
+    padding: 10px 12px; text-align: left;
+  }
+  .skinfold-table th.num { text-align: right; }
+
+  .skinfold-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .15s;
+  }
+  .skinfold-table tbody tr:hover { background: rgba(0,212,255,.03); }
+
+  .location-cell {
+    padding: 14px 12px;
+    min-width: 160px;
+  }
+  .location-name {
+    font-size: 12px; font-weight: 700; color: #c8d8e8;
+    margin-bottom: 2px; letter-spacing: .02em;
+  }
+  .location-zone {
+    font-size: 9px; color: #4a5578; letter-spacing: .1em; text-transform: uppercase;
+  }
+
+  .bar-cell { padding: 14px 12px; width: 100%; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .bar-row:last-child { margin-bottom: 0; }
+
+  .bar-label { font-size: 9px; color: #4a5578; width: 14px; text-align: right; flex-shrink: 0; }
+
+  .bar-track {
+    flex: 1; height: 6px;
+    background: rgba(255,255,255,.05);
+    border-radius: 0;
+    position: relative;
+    overflow: visible;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 0;
+    position: relative;
+    transition: width .4s ease;
+  }
+
+  /* Standard = cyan */
+  .bar-fill--std   { background: #00d4ff; box-shadow: 0 0 6px rgba(0,212,255,.5); }
+  /* Powerlifter = gold */
+  .bar-fill--pow   { background: #ffe600; box-shadow: 0 0 6px rgba(255,230,0,.5); }
+  /* Paciente = mint */
+  .bar-fill--pat   { background: #00ff9f; box-shadow: 0 0 6px rgba(0,255,159,.5); }
+
+  .bar-value {
+    font-size: 10px; font-weight: 700; width: 38px;
+    text-align: right; flex-shrink: 0; letter-spacing: .03em;
+  }
+  .bar-value--std { color: #00d4ff; }
+  .bar-value--pow { color: #ffe600; }
+  .bar-value--pat { color: #00ff9f; }
+
+  /* Delta badge */
+  .delta-cell { padding: 14px 12px; text-align: right; min-width: 80px; }
+  .delta {
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    padding: 3px 8px;
+    border: 1px solid;
+    display: inline-block;
+  }
+  .delta--above {
+    color: #ff0080; border-color: rgba(255,0,128,.4);
+    background: rgba(255,0,128,.07);
+  }
+  .delta--below {
+    color: #00ff9f; border-color: rgba(0,255,159,.4);
+    background: rgba(0,255,159,.07);
+  }
+  .delta--neutral {
+    color: #4a5578; border-color: rgba(74,85,120,.4);
+    background: transparent;
+  }
+
+  /* Summary strip */
+  .summary {
+    margin-top: 32px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .summary-card {
+    background: #0d0d1f;
+    border: 1px solid #1a1a3e;
+    padding: 18px 16px;
+    position: relative;
+  }
+  .summary-card::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 8px; height: 8px;
+    border-top: 2px solid; border-left: 2px solid;
+  }
+  .summary-card::after {
+    content: ''; position: absolute; bottom: -1px; right: -1px;
+    width: 8px; height: 8px;
+    border-bottom: 2px solid; border-right: 2px solid;
+  }
+  .summary-card--std::before, .summary-card--std::after { border-color: #00d4ff; }
+  .summary-card--pow::before, .summary-card--pow::after { border-color: #ffe600; }
+  .summary-card--pat::before, .summary-card--pat::after { border-color: #00ff9f; }
+
+  .summary-label {
+    font-size: 8px; letter-spacing: .2em; text-transform: uppercase;
+    color: #4a5578; margin-bottom: 8px;
+  }
+  .summary-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: .04em;
+    margin-bottom: 10px;
+  }
+  .summary-card--std .summary-name { color: #00d4ff; }
+  .summary-card--pow .summary-name { color: #ffe600; }
+  .summary-card--pat .summary-name { color: #00ff9f; }
+
+  .summary-stat { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  .summary-card--std .summary-stat { color: #00d4ff; }
+  .summary-card--pow .summary-stat { color: #ffe600; }
+  .summary-card--pat .summary-stat { color: #00ff9f; }
+
+  .summary-sub { font-size: 10px; color: #4a5578; letter-spacing: .04em; }
+  .summary-bf { font-size: 11px; color: #c8d8e8; margin-top: 6px; }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #1a1a3e, transparent);
+    margin: 28px 0;
+  }
+
+  .section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px; letter-spacing: .15em; text-transform: uppercase;
+    color: #4a5578; margin-bottom: 14px;
+  }
+
+  @media (max-width: 600px) {
+    .summary { grid-template-columns: 1fr; }
+    .delta-cell { display: none; }
+    .location-cell { min-width: 120px; }
+  }
+</style>
+
+<div class="container">
+
+  <div class="header">
+    <div class="eyebrow">NUTRICAL // COMPOSICIÓN CORPORAL</div>
+    <h1>PLIEGUES CUTÁNEOS — COMPARATIVA</h1>
+    <div class="subtitle">Valores en mm · Ordenados anatómicamente · Hombre, 40 años</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#00d4ff;box-shadow:0 0 6px rgba(0,212,255,.6)"></div>Estándar</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ffe600;box-shadow:0 0 6px rgba(255,230,0,.6)"></div>Powerlifter</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#00ff9f;box-shadow:0 0 6px rgba(0,255,159,.6)"></div>Alejandro</div>
+  </div>
+
+  <div class="section-label">◈ Pliegues — Cabeza a Pies</div>
+
+  <table class="skinfold-table">
+    <thead>
+      <tr>
+        <th>Sitio</th>
+        <th>Comparativa</th>
+        <th class="num">vs. Powerlifter</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="divider"></div>
+
+  <div class="section-label">◈ Resumen por Perfil</div>
+
+  <div class="summary">
+    <div class="summary-card summary-card--std">
+      <div class="summary-label">Perfil</div>
+      <div class="summary-name">ESTÁNDAR</div>
+      <div class="summary-stat" id="std-sum">—</div>
+      <div class="summary-sub">Suma de 8 pliegues (mm)</div>
+      <div class="summary-bf" id="std-bf"></div>
+    </div>
+    <div class="summary-card summary-card--pow">
+      <div class="summary-label">Perfil</div>
+      <div class="summary-name">POWERLIFTER</div>
+      <div class="summary-stat" id="pow-sum">—</div>
+      <div class="summary-sub">Suma de 8 pliegues (mm)</div>
+      <div class="summary-bf" id="pow-bf"></div>
+    </div>
+    <div class="summary-card summary-card--pat">
+      <div class="summary-label">Paciente</div>
+      <div class="summary-name">ALEJANDRO</div>
+      <div class="summary-stat" id="pat-sum">—</div>
+      <div class="summary-sub">Suma de 8 pliegues (mm)</div>
+      <div class="summary-bf" id="pat-bf"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Pliegues ordenados anatómicamente (cabeza a pies)
+const SITES = [
+  { name: 'Bicipital',     zone: 'Brazo anterior',   std: 8,  pow: 11,  pat: 9.0  },
+  { name: 'Tricipital',    zone: 'Brazo posterior',  std: 14, pow: 20,  pat: 13.5 },
+  { name: 'Subescapular',  zone: 'Espalda alta',     std: 16, pow: 23,  pat: 22.5 },
+  { name: 'Supraespinal',  zone: 'Torso lateral',    std: 16, pow: 24,  pat: 25.5 },
+  { name: 'Suprailiaco',   zone: 'Cadera',           std: 20, pow: 30,  pat: 35.5 },
+  { name: 'Abdominal',     zone: 'Abdomen',          std: 25, pow: 36,  pat: 41.0 },
+  { name: 'Muslo medio',   zone: 'Muslo anterior',   std: 17, pow: 22,  pat: 8.0  },
+  { name: 'Pantorrilla',   zone: 'Pierna medial',    std: 13, pow: 16,  pat: 9.5  },
+];
+
+const MAX_VAL = 50; // escala de barras
+
+function buildRow(site) {
+  const delta = site.pat - site.pow;
+  const deltaLabel = delta > 1.5 ? `+${delta.toFixed(1)}` : delta < -1.5 ? `${delta.toFixed(1)}` : '≈';
+  const deltaClass = delta > 1.5 ? 'delta--above' : delta < -1.5 ? 'delta--below' : 'delta--neutral';
+
+  const pctStd = (site.std / MAX_VAL * 100).toFixed(1);
+  const pctPow = (site.pow / MAX_VAL * 100).toFixed(1);
+  const pctPat = (site.pat / MAX_VAL * 100).toFixed(1);
+
+  return `
+    <tr>
+      <td class="location-cell">
+        <div class="location-name">${site.name}</div>
+        <div class="location-zone">${site.zone}</div>
+      </td>
+      <td class="bar-cell">
+        <div class="bar-row">
+          <div class="bar-label">E</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--std" style="width:${pctStd}%"></div></div>
+          <div class="bar-value bar-value--std">${site.std} mm</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">P</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--pow" style="width:${pctPow}%"></div></div>
+          <div class="bar-value bar-value--pow">${site.pow} mm</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">A</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--pat" style="width:${pctPat}%"></div></div>
+          <div class="bar-value bar-value--pat">${site.pat} mm</div>
+        </div>
+      </td>
+      <td class="delta-cell">
+        <span class="delta ${deltaClass}">${deltaLabel} mm</span>
+      </td>
+    </tr>
+  `;
+}
+
+const tbody = document.getElementById('tbody');
+tbody.innerHTML = SITES.map(buildRow).join('');
+
+// Sums
+const stdSum = SITES.reduce((a, s) => a + s.std, 0);
+const powSum = SITES.reduce((a, s) => a + s.pow, 0);
+const patSum = SITES.reduce((a, s) => a + s.pat, 0);
+
+document.getElementById('std-sum').textContent = stdSum.toFixed(1);
+document.getElementById('pow-sum').textContent = powSum.toFixed(1);
+document.getElementById('pat-sum').textContent = patSum.toFixed(1);
+
+// % grasa estimado (Durnin & Womersley, log suma 4 pliegues, hombre 40-49)
+// Usamos bicipital + tricipital + subescapular + suprailiaco
+function bf4(sites) {
+  const sum4 = sites.find(s=>s.name==='Bicipital').pat
+    + sites.find(s=>s.name==='Tricipital').pat
+    + sites.find(s=>s.name==='Subescapular').pat
+    + sites.find(s=>s.name==='Suprailiaco').pat;
+  const density = 1.1581 - 0.0720 * Math.log10(sum4);
+  return ((4.95 / density) - 4.5) * 100;
+}
+
+function bf4Profile(bic, tri, sub, sup) {
+  const sum4 = bic + tri + sub + sup;
+  const density = 1.1581 - 0.0720 * Math.log10(sum4);
+  return ((4.95 / density) - 4.5) * 100;
+}
+
+const stdBF = bf4Profile(8, 14, 16, 20);
+const powBF = bf4Profile(11, 20, 23, 30);
+
+// Alejandro real
+const patBF = bf4Profile(9, 13.5, 22.5, 35.5);
+
+document.getElementById('std-bf').textContent = `≈ ${stdBF.toFixed(1)}% grasa corporal`;
+document.getElementById('pow-bf').textContent = `≈ ${powBF.toFixed(1)}% grasa corporal`;
+document.getElementById('pat-bf').textContent = `≈ ${patBF.toFixed(1)}% grasa corporal`;
+</script>
