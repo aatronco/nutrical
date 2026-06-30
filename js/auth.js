@@ -43,7 +43,7 @@ export function initAuth() {
         sessionStorage.setItem('gsi_token', accessToken);
         if (window._tokenResolve) { window._tokenResolve(); window._tokenResolve = null; }
         if (location.hash === '#/login' || location.hash === '') {
-          location.hash = '#/dashboard';
+          location.hash = '#/select';
         }
       },
     });

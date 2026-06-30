@@ -7,6 +7,7 @@ import { renderConsultation, bindConsultation }         from './views/consultati
 import { renderReport, bindReport }                     from './views/report.js';
 import { renderDashboard, bindDashboard }               from './views/dashboard.js';
 import { renderWorkout, bindWorkout }                   from './views/workout.js';
+import { renderAppSelect, bindAppSelect }               from './views/app-select.js';
 
 const main    = () => document.getElementById('main');
 const nav     = () => document.getElementById('topnav');
@@ -66,6 +67,15 @@ async function route() {
     return;
   }
 
+  // App selector
+  if (root === 'select') {
+    nav().classList.add('hidden');
+    hideBottomNav();
+    main().innerHTML = renderAppSelect();
+    bindAppSelect();
+    return;
+  }
+
   // Workout app routes
   if (root === 'dashboard') {
     nav().classList.add('hidden');
@@ -116,7 +126,7 @@ async function route() {
     return;
   }
 
-  location.hash = '#/dashboard';
+  location.hash = '#/select';
 }
 
 export function initRouter() {
