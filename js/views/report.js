@@ -1,6 +1,7 @@
 // js/views/report.js
 import { getPatients, getConsultations } from '../sheets.js';
 import { calcularTodo, calcularEdad } from '../formulas.js';
+import { renderSkinfoldSVG, renderDiameterSVG, renderEvolutionChart, renderCompositionScore } from '../body-charts.js';
 
 function bar(pct, label, color = '#1c1917') {
   return `
@@ -138,17 +139,43 @@ export async function renderReport(patientId) {
       </div>
     </div>
 
-    <!-- Section 6: Progress chart -->
-    ${completed.length > 1 ? `
-    <div class="report-section card">
-      <h3 style="font-weight:700;margin-bottom:12px">Progresión</h3>
-      <canvas id="report-chart" height="80"></canvas>
+    <!-- Section 6: Body composition score -->
+    ${renderCompositionScore(latest, r, patient.nombre)}
+
+    <!-- Section 7: Skinfold silhouette chart -->
+    ${latest.tricipital || latest.subescapular ? `
+    <div class="report-section card" style="padding:12px 8px">
+      <h3 style="font-weight:700;margin-bottom:12px;padding:0 8px">Silueta — Pliegues Cutáneos</h3>
+      <div style="overflow-x:auto">${renderSkinfoldSVG(latest, patient.nombre)}</div>
     </div>` : ''}
 
-    <!-- Section 7: Comparison table -->
+    <!-- Section 8: Diameter silhouette chart -->
+    ${latest.biacromial || latest.biliocrestideo ? `
+    <div class="report-section card" style="padding:12px 8px">
+      <h3 style="font-weight:700;margin-bottom:12px;padding:0 8px">Silueta — Diámetros Óseos</h3>
+      <div style="overflow-x:auto">${renderDiameterSVG(latest, patient.nombre)}</div>
+    </div>` : ''}
+
+    <!-- Section 9: Temporal evolution -->
     ${completed.length > 1 ? `
     <div class="report-section card">
-      <h3 style="font-weight:700;margin-bottom:12px">Comparativa de consultas</h3>
+      <h3 style="font-weight:700;margin-bottom:16px">Evolución Temporal</h3>
+      ${renderEvolutionChart(completed, [
+        { key:'peso',    label:'Peso (kg)',       color:'#c8d8e8', extract: c => c.peso },
+        { key:'adiposa', label:'% Masa Adiposa',  color:'#ff0080', extract: c => { const res=calcularTodo(c, patient.sexo, patient.fecha_nacimiento); return res?.masas?.adiposa ? +(res.masas.adiposa.pct*100).toFixed(1) : null; }},
+        { key:'musc',    label:'% Masa Muscular', color:'#00ff9f', extract: c => { const res=calcularTodo(c, patient.sexo, patient.fecha_nacimiento); return res?.masas?.muscular ? +(res.masas.muscular.pct*100).toFixed(1) : null; }},
+        { key:'sum6',    label:'Σ 6 Pliegues (mm)', color:'#ffe600', extract: c => {
+          const keys=['tricipital','subescapular','supraespinal','abdominal','muslo_medio_pliegue','pantorrilla_pliegue'];
+          const vals=keys.map(k=>c[k]).filter(v=>v!=null);
+          return vals.length===6 ? +vals.reduce((a,b)=>a+b,0).toFixed(1) : null;
+        }},
+      ])}
+    </div>` : ''}
+
+    <!-- Section 10: Comparison table -->
+    ${completed.length > 1 ? `
+    <div class="report-section card">
+      <h3 style="font-weight:700;margin-bottom:12px">Comparativa de Consultas</h3>
       ${compTable}
     </div>` : ''}
   `;

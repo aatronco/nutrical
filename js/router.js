@@ -7,6 +7,7 @@ import { renderConsultation, bindConsultation }         from './views/consultati
 import { renderReport, bindReport }                     from './views/report.js';
 import { renderDashboard, bindDashboard }               from './views/dashboard.js';
 import { renderWorkout, bindWorkout }                   from './views/workout.js';
+import { renderProgress, bindProgress }                 from './views/progress.js';
 import { renderAppSelect, bindAppSelect }               from './views/app-select.js';
 
 const main    = () => document.getElementById('main');
@@ -90,6 +91,14 @@ async function route() {
     renderBottomNav('workout');
     main().innerHTML = renderWorkout(parts[1]);
     bindWorkout(parts[1]);
+    return;
+  }
+
+  if (root === 'progress') {
+    nav().classList.add('hidden');
+    renderBottomNav('progress');
+    main().innerHTML = renderProgress();
+    bindProgress();
     return;
   }
 
