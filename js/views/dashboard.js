@@ -73,7 +73,7 @@ export function renderDashboard() {
           💪 Iniciar S5 — Cadena Posterior
         </a>
         <a href="#/workout/kine" style="display:block;padding:16px;background:var(--card);border:1px solid var(--cyan);border-radius:14px;color:var(--cyan);font-weight:800;text-decoration:none;text-align:center;">
-          🏥 Ver Kine — S2 / S4
+          🏔️ Sentadilla — S2 / S4
         </a>
         <a href="#/progress" style="display:block;padding:16px;background:var(--card);border:1px solid var(--purple);border-radius:14px;color:var(--purple);font-weight:800;text-decoration:none;text-align:center;">
           📈 Ver Progresión

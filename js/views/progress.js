@@ -7,6 +7,8 @@ const LIFTS = [
   { key: 'S1', name: 'Press Banca', color: 'var(--pink)',   icon: '🏋️' },
   { key: 'S5', name: 'Deadlift',    color: 'var(--gold)',   icon: '⛓️'  },
 ];
+// Squat tracked separately — kine session uses RPE, no byWeek targets
+const SQUAT_KEY = 'sentadilla';
 
 function getPRTargets(sessionKey) {
   const session = SESSIONS[sessionKey];
@@ -143,6 +145,25 @@ export function renderProgress() {
       </div>`;
   }).join('');
 
+  // Squat card (kine session, RPE-based — no weekly targets)
+  const squatPR = storedPRs[SQUAT_KEY];
+  const squatCard = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--cyan)">🏔️ Sentadilla Frontal</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">Sesión S2/S4 — carga por RPE, sin objetivos semanales fijos</div>
+        </div>
+        ${squatPR ? `<div style="text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--cyan)">${squatPR} kg</div>
+          <div style="font-size:9px;color:var(--dim)">PR actual</div>
+        </div>` : `<div style="font-size:11px;color:var(--dim)">Sin PR registrado</div>`}
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:10px">
+        Squat frontal (back bar) · 3×8 · Progresa cuando se siente @7 o menos · Video requerido
+      </div>
+    </div>`;
+
   // Pull-up progression
   const s3 = SESSIONS.S3;
   const pullupCard = s3?.T1?.frente1 ? `
@@ -176,6 +197,10 @@ export function renderProgress() {
           <input id="pr-deadlift" type="number" value="${storedPRs.deadlift||''}" step="0.5" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-family:'JetBrains Mono',monospace">
         </div>
         <div style="flex:1;min-width:120px">
+          <label style="font-size:10px;color:var(--dim);display:block;margin-bottom:4px">Sentadilla (kg)</label>
+          <input id="pr-sentadilla" type="number" value="${storedPRs[SQUAT_KEY]||''}" step="0.5" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-family:'JetBrains Mono',monospace">
+        </div>
+        <div style="flex:1;min-width:120px">
           <label style="font-size:10px;color:var(--dim);display:block;margin-bottom:4px">Pullups (reps)</label>
           <input id="pr-pullups" type="number" value="${storedPRs.pullups||''}" step="1" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-family:'JetBrains Mono',monospace">
         </div>
@@ -189,19 +214,22 @@ export function renderProgress() {
       <div style="font-size:12px;color:var(--dim);margin-bottom:20px">Semana ${week} de 6 — ${getPhaseForWeek(week).label}</div>
       ${updateForm}
       ${liftCards}
+      ${squatCard}
       ${pullupCard}
     </div>`;
 }
 
 export function bindProgress() {
   document.getElementById('save-prs')?.addEventListener('click', () => {
-    const banca    = parseFloat(document.getElementById('pr-banca')?.value);
-    const deadlift = parseFloat(document.getElementById('pr-deadlift')?.value);
-    const pullups  = parseInt(document.getElementById('pr-pullups')?.value);
+    const banca      = parseFloat(document.getElementById('pr-banca')?.value);
+    const deadlift   = parseFloat(document.getElementById('pr-deadlift')?.value);
+    const sentadilla = parseFloat(document.getElementById('pr-sentadilla')?.value);
+    const pullups    = parseInt(document.getElementById('pr-pullups')?.value);
     const prs = {};
-    if (!isNaN(banca))    prs.banca    = banca;
-    if (!isNaN(deadlift)) prs.deadlift = deadlift;
-    if (!isNaN(pullups))  prs.pullups  = pullups;
+    if (!isNaN(banca))      prs.banca      = banca;
+    if (!isNaN(deadlift))   prs.deadlift   = deadlift;
+    if (!isNaN(sentadilla)) prs[SQUAT_KEY] = sentadilla;
+    if (!isNaN(pullups))    prs.pullups    = pullups;
     localStorage.setItem('gzclp_prs', JSON.stringify(prs));
     const btn = document.getElementById('save-prs');
     btn.textContent = '✓ Guardado';

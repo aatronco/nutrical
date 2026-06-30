@@ -234,10 +234,10 @@ function renderHombroTerapeutico(bloque) {
 function renderKine(session) {
   return `
     <div style="padding:14px 14px 20px;">
-      <div class="eva-warning">⚠ EVA máximo ${session.evaMax}/10 — si hay molestia, reducir y reportar al kine.</div>
+      <div class="eva-warning">⚠ EVA máximo ${session.evaMax}/10 — si hay molestia, reducir y reportar al kinesiólogo.</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <h2 style="font-size:17px;font-weight:800;color:var(--text);">${session.name}</h2>
-        <span class="badge-kine">PROTOCOLO KINE — solo lectura</span>
+        <h2 style="font-size:17px;font-weight:800;color:var(--text);">Sentadilla — S2 / S4</h2>
+        <span class="badge-kine">PROTOCOLO RODILLA — solo lectura</span>
       </div>
       <h3 style="font-size:14px;font-weight:700;color:var(--text);margin:12px 0 8px;padding-left:10px;border-left:3px solid var(--cyan);">Bloque Rodilla</h3>
       ${session.bloqueRodilla.map(e => `
