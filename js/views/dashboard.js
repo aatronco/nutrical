@@ -191,9 +191,24 @@ function gzclpInfo() {
         </div>
 
         <!-- Desventajas -->
-        <div style="margin-bottom:4px">
+        <div style="margin-bottom:16px">
           <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);margin-bottom:10px;font-family:'JetBrains Mono',monospace">✗ LIMITACIONES</div>
           ${CON.map(r => row(r,'var(--pink)')).join('')}
+        </div>
+
+        <!-- Modificaciones -->
+        <div style="background:rgba(160,100,255,.06);border:1px solid rgba(160,100,255,.25);border-radius:10px;padding:14px;margin-bottom:4px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--purple);margin-bottom:10px;font-family:'JetBrains Mono',monospace">⚡ MODIFICACIONES — GZCLP v6</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">
+            Esta versión introduce un <strong style="color:var(--purple)">bloque de sentadilla 2×/semana</strong> (S2 y S4)
+            para compensar directamente la limitación de cuádriceps del GZCLP estándar,
+            combinado con un protocolo de rehabilitación de rodilla activa.
+          </div>
+          ${[
+            ['Sentadilla frontal 2×/semana', 'S2 y S4 incluyen front squat (back bar) como movimiento de cuádriceps dominante. La frecuencia doble genera suficiente estímulo para hipertrofia de cuádriceps que el programa original no cubre.'],
+            ['Protocolo rodilla integrado',   'Los días S2/S4 combinan trabajo de cuádriceps con ejercicios de estabilización de rodilla (pogos búlgaros, high step, pistol asistido). Permite progresar fuerza sin agravar patologías previas de rodilla.'],
+            ['T2 de banca en S3',             'El press banca aparece como T2 en la sesión de tirón, aumentando la frecuencia de empuje horizontal a 2×/semana sin añadir días de entrenamiento extra.'],
+          ].map(r => row(r, 'var(--purple)')).join('')}
         </div>
 
         <div style="font-size:10px;color:rgba(255,255,255,.2);text-align:right;margin-top:12px;font-family:'JetBrains Mono',monospace">
