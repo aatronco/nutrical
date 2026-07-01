@@ -3,7 +3,7 @@ import { CLIENT_ID, SPREADSHEET_SCOPE } from './config.js';
 import { initRouter } from './router.js';
 
 let tokenClient;
-let accessToken = sessionStorage.getItem('gsi_token') || null;
+let accessToken = localStorage.getItem('gsi_token') || null;
 
 export function getToken() { return accessToken; }
 
@@ -11,7 +11,8 @@ export function isLoggedIn() { return !!accessToken; }
 
 export function logout() {
   accessToken = null;
-  sessionStorage.removeItem('gsi_token');
+  localStorage.removeItem('gsi_token');
+  localStorage.removeItem('gsi_had_session');
   location.hash = '#/login';
 }
 
@@ -40,14 +41,22 @@ export function initAuth() {
           return;
         }
         accessToken = resp.access_token;
-        sessionStorage.setItem('gsi_token', accessToken);
+        localStorage.setItem('gsi_token', accessToken);
+        localStorage.setItem('gsi_had_session', '1');
         if (window._tokenResolve) { window._tokenResolve(); window._tokenResolve = null; }
         if (location.hash === '#/login' || location.hash === '') {
           location.hash = '#/select';
         }
       },
     });
-    initRouter();
+
+    if (!accessToken && localStorage.getItem('gsi_had_session') === '1') {
+      renewToken()
+        .catch(() => { localStorage.removeItem('gsi_had_session'); })
+        .finally(() => initRouter());
+    } else {
+      initRouter();
+    }
   };
 
   if (typeof google !== 'undefined') {
