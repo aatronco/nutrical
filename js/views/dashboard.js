@@ -2,7 +2,8 @@
 import { getCurrentWeek } from '../load-calculator.js';
 import { getAthletes, getActiveAthlete, getActiveAthleteId, setActiveAthlete,
          saveAthlete, deleteAthlete, getAthletePRs, setAthletePRs,
-         getAthleteProgramStart, setAthleteProgramStart } from '../athletes.js';
+         getAthleteProgramStart, setAthleteProgramStart,
+         getAthleteWeekOverride, setAthleteWeekOverride } from '../athletes.js';
 
 function esc(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -11,7 +12,7 @@ function esc(str) {
 export function renderDashboard() {
   const athlete   = getActiveAthlete();
   const startDate = getAthleteProgramStart(athlete.id);
-  const week      = getCurrentWeek(startDate);
+  const week      = getCurrentWeek(startDate, getAthleteWeekOverride(athlete.id));
   const prs       = getAthletePRs(athlete.id);
   const athletes  = getAthletes();
 
@@ -43,7 +44,11 @@ export function renderDashboard() {
 
       <div class="hero" style="border-radius:14px;margin-bottom:16px;">
         <div class="hero-eyebrow">▸ PRIDE EDITION ▸</div>
-        <h1>${esc(athlete.icon||'🏋️')} ${esc(athlete.name)} — S${week}/6</h1>
+        <h1>${esc(athlete.icon||'🏋️')} ${esc(athlete.name)} —
+          <button class="week-nav-btn" data-week-action="prev" aria-label="Semana anterior" ${week<=1?'disabled':''}>‹</button>
+          S${week}/6
+          <button class="week-nav-btn" data-week-action="next" aria-label="Semana siguiente" ${week>=6?'disabled':''}>›</button>
+        </h1>
         <p class="hero-sub">GZCLP v6 — ${phaseLabel(week)}</p>
       </div>
 
@@ -219,6 +224,19 @@ function gzclpInfo() {
 }
 
 export function bindDashboard() {
+  const athlete = getActiveAthlete();
+
+  // Manual week selector
+  document.querySelectorAll('[data-week-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const startDate = getAthleteProgramStart(athlete.id);
+      const current   = getCurrentWeek(startDate, getAthleteWeekOverride(athlete.id));
+      const delta      = btn.dataset.weekAction === 'next' ? 1 : -1;
+      setAthleteWeekOverride(athlete.id, current + delta);
+      location.reload();
+    });
+  });
+
   // GZCLP info toggle
   document.getElementById('gzclp-toggle')?.addEventListener('click', () => {
     const body  = document.getElementById('gzclp-body');

@@ -362,3 +362,11 @@ input:focus, select:focus, textarea:focus {
 
 /* ── Layout ── */
 body { padding-bottom: calc(64px + var(--safe-bottom)); }
+
+.week-nav-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--dim);
+  border-radius: 6px; width: 26px; height: 26px; font-size: 16px; line-height: 1;
+  cursor: pointer; vertical-align: middle;
+}
+.week-nav-btn:disabled { opacity: .3; cursor: default; }
+.week-nav-btn:not(:disabled):hover { border-color: var(--cyan); color: var(--cyan); }
