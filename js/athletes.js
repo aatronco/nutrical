@@ -82,3 +82,13 @@ export function setAthleteProgramStart(athleteId, date) {
     localStorage.setItem('gzclp_program_start', date);
   }
 }
+
+export function getAthleteWeekOverride(athleteId) {
+  const stored = localStorage.getItem(athleteKey(athleteId, 'week_override'));
+  return stored ? parseInt(stored, 10) : null;
+}
+
+export function setAthleteWeekOverride(athleteId, week) {
+  const clamped = Math.min(Math.max(parseInt(week, 10), 1), 6);
+  localStorage.setItem(athleteKey(athleteId, 'week_override'), String(clamped));
+}
