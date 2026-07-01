@@ -48,12 +48,20 @@ export function renderWorkout(sessionKey) {
       </h2>
       ${renderT3List(session.T3, week)}
 
-      <button id="btn-complete-session"
-        style="width:100%;margin-top:24px;padding:16px;border-radius:14px;
-               border:none;background:var(--purple);color:#fff;
-               font-size:16px;font-weight:800;cursor:pointer;">
-        ✓ Completar sesión
-      </button>
+      <div style="display:flex;gap:10px;margin-top:24px;">
+        <button id="btn-print-session"
+          style="flex:0 0 56px;padding:16px;border-radius:14px;
+                 border:1px solid var(--border);background:transparent;color:var(--dim);
+                 font-size:18px;cursor:pointer;">
+          🖶
+        </button>
+        <button id="btn-complete-session"
+          style="flex:1;padding:16px;border-radius:14px;
+                 border:none;background:var(--purple);color:#fff;
+                 font-size:16px;font-weight:800;cursor:pointer;">
+          ✓ Completar sesión
+        </button>
+      </div>
     </div>
     <div id="timer-overlay" class="timer-overlay" style="display:none;">
       <div class="timer-overlay__label">Descanso</div>
@@ -68,6 +76,9 @@ export function bindWorkout(sessionKey) {
 
   document.querySelector('[data-back]')?.addEventListener('click', () => {
     location.hash = '#/dashboard';
+  });
+  document.getElementById('btn-print-session')?.addEventListener('click', () => {
+    window.print();
   });
 
   if (!session || session.readonly) return;
@@ -273,6 +284,12 @@ function renderKine(session) {
           ${e.note ? `<div style="font-size:12px;color:#ddb0ff;margin-top:5px;">${e.note}</div>` : ''}
         </div>
       `).join('')}
+      <button id="btn-print-session"
+        style="width:100%;margin-top:20px;padding:16px;border-radius:14px;
+               border:1px solid var(--border);background:transparent;color:var(--dim);
+               font-size:14px;font-weight:700;cursor:pointer;">
+        🖶 Imprimir
+      </button>
     </div>
   `;
 }
