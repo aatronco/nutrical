@@ -212,6 +212,8 @@ export function renderProgress() {
 
   return `
     <div style="padding:14px 14px 20px">
+      <button class="btn btn-dim" data-back style="margin-bottom:12px;padding:8px 16px;">← Volver</button>
+
       <h2 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px">📈 Progresión GZCLP v6</h2>
       <div style="font-size:12px;color:var(--dim);margin-bottom:20px">Semana ${week} de 6 — ${getPhaseForWeek(week).label}</div>
       ${updateForm}
@@ -222,6 +224,10 @@ export function renderProgress() {
 }
 
 export function bindProgress() {
+  document.querySelector('[data-back]')?.addEventListener('click', () => {
+    location.hash = '#/dashboard';
+  });
+
   document.getElementById('save-prs')?.addEventListener('click', () => {
     const banca      = parseFloat(document.getElementById('pr-banca')?.value);
     const deadlift   = parseFloat(document.getElementById('pr-deadlift')?.value);

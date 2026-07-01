@@ -20,6 +20,8 @@ export function renderWorkout(sessionKey) {
 
   return `
     <div style="padding:14px 14px 20px;" id="workout-view">
+      <button class="btn btn-dim" data-back style="margin-bottom:12px;padding:8px 16px;">← Volver</button>
+
       <div class="phase-banner phase-banner--${phase.color}">
         ◈ ${phase.label} — Semana ${week}
       </div>
@@ -63,6 +65,11 @@ export function renderWorkout(sessionKey) {
 
 export function bindWorkout(sessionKey) {
   const session = SESSIONS[sessionKey];
+
+  document.querySelector('[data-back]')?.addEventListener('click', () => {
+    location.hash = '#/dashboard';
+  });
+
   if (!session || session.readonly) return;
 
   // Clean up any active timer from previous session
@@ -237,6 +244,8 @@ function renderHombroTerapeutico(bloque) {
 function renderKine(session) {
   return `
     <div style="padding:14px 14px 20px;">
+      <button class="btn btn-dim" data-back style="margin-bottom:12px;padding:8px 16px;">← Volver</button>
+
       <div class="eva-warning">⚠ EVA máximo ${session.evaMax}/10 — si hay molestia, reducir y reportar al kinesiólogo.</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
         <h2 style="font-size:17px;font-weight:800;color:var(--text);">Sentadilla — S2 / S4</h2>
