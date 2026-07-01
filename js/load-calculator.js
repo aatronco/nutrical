@@ -9,7 +9,10 @@ export function getT1Sets(session, week) {
   return [...(weekData.warmup || []), ...(weekData.work || [])];
 }
 
-export function getCurrentWeek(programStartDate) {
+export function getCurrentWeek(programStartDate, weekOverride) {
+  if (weekOverride != null) {
+    return Math.min(Math.max(parseInt(weekOverride, 10), 1), 6);
+  }
   const start = new Date(programStartDate);
   const now   = new Date();
   const days  = Math.floor((now - start) / (1000 * 60 * 60 * 24));

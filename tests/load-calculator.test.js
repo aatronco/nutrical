@@ -48,3 +48,24 @@ test('getCurrentWeek clamps to 6 maximum', () => {
   d.setDate(d.getDate() - 60);
   assert.equal(getCurrentWeek(d.toISOString().slice(0, 10)), 6);
 });
+
+test('getCurrentWeek returns override when provided', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal(getCurrentWeek(today, 4), 4);
+});
+
+test('getCurrentWeek clamps override above 6', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal(getCurrentWeek(today, 9), 6);
+});
+
+test('getCurrentWeek clamps override below 1', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal(getCurrentWeek(today, 0), 1);
+});
+
+test('getCurrentWeek falls back to date calculation when override is null', () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 8);
+  assert.equal(getCurrentWeek(d.toISOString().slice(0, 10), null), 2);
+});
