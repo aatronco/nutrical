@@ -2,6 +2,7 @@
 // Strength progression dashboard — shows planned vs actual PR targets per week.
 import { SESSIONS, PHASES, getPhaseForWeek } from '../workout-data.js';
 import { getCurrentWeek } from '../load-calculator.js';
+import { getActiveAthleteId, getAthleteWeekOverride } from '../athletes.js';
 
 const LIFTS = [
   { key: 'S1', name: 'Press Banca', color: 'var(--pink)',   icon: '🏋️' },
@@ -83,7 +84,8 @@ function miniChart(lifts, targets, currentWeek, prs) {
 
 export function renderProgress() {
   const startDate = localStorage.getItem('gzclp_program_start') || new Date().toISOString().slice(0,10);
-  const week      = getCurrentWeek(startDate);
+  const athleteId = getActiveAthleteId();
+  const week      = getCurrentWeek(startDate, getAthleteWeekOverride(athleteId));
   const storedPRs = JSON.parse(localStorage.getItem('gzclp_prs') || '{}');
   const actualPRs = {
     S1: storedPRs.banca    || SESSIONS.S1?.T1?.prBase,

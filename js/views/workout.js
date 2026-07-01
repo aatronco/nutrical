@@ -3,6 +3,7 @@ import { SESSIONS, getPhaseForWeek } from '../workout-data.js';
 import { getT1Sets, getCurrentWeek } from '../load-calculator.js';
 import { saveSession }                from '../db.js';
 import { createTimer }                from '../timer.js';
+import { getActiveAthleteId, getAthleteWeekOverride } from '../athletes.js';
 
 let activeTimer = null;
 
@@ -12,7 +13,8 @@ export function renderWorkout(sessionKey) {
   if (session.readonly) return renderKine(session);
 
   const startDate = localStorage.getItem('gzclp_program_start') || new Date().toISOString().slice(0,10);
-  const week      = getCurrentWeek(startDate);
+  const athleteId = getActiveAthleteId();
+  const week      = getCurrentWeek(startDate, getAthleteWeekOverride(athleteId));
   const phase     = getPhaseForWeek(week);
   const t1Sets    = getT1Sets(sessionKey, week);
 
@@ -83,7 +85,8 @@ export function bindWorkout(sessionKey) {
   if (completeBtn) {
     completeBtn.addEventListener('click', async () => {
       const startDate = localStorage.getItem('gzclp_program_start') || new Date().toISOString().slice(0,10);
-      const week      = getCurrentWeek(startDate);
+      const athleteId = getActiveAthleteId();
+      const week      = getCurrentWeek(startDate, getAthleteWeekOverride(athleteId));
       const phase     = getPhaseForWeek(week);
       try {
         await saveSession({
