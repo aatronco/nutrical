@@ -259,7 +259,7 @@ function renderKine(session) {
 
       <div class="eva-warning">⚠ EVA máximo ${session.evaMax}/10 — si hay molestia, reducir y reportar al kinesiólogo.</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <h2 style="font-size:17px;font-weight:800;color:var(--text);">Sentadilla — S2 / S4</h2>
+        <h2 style="font-size:17px;font-weight:800;color:var(--text);">Piernas — S2 / S4</h2>
         <span class="badge-kine">PROTOCOLO RODILLA — solo lectura</span>
       </div>
       <h3 style="font-size:14px;font-weight:700;color:var(--text);margin:12px 0 8px;padding-left:10px;border-left:3px solid var(--cyan);">Bloque Rodilla</h3>
@@ -274,16 +274,7 @@ function renderKine(session) {
           </div>
         </div>
       `).join('')}
-      <h3 style="font-size:14px;font-weight:700;color:var(--text);margin:18px 0 8px;padding-left:10px;border-left:3px solid var(--purple);">Bloque Hombro</h3>
-      ${session.bloqueHombro.map(e => `
-        <div class="session-card">
-          <div class="session-card__title">${e.num}. ${e.name}</div>
-          <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-            <b style="color:var(--text)">${e.load}</b> · ${e.sets ? `${e.sets}×${e.reps}` : (e.reps ?? '—')} · ${e.rest || 0}"
-          </div>
-          ${e.note ? `<div style="font-size:12px;color:#ddb0ff;margin-top:5px;">${e.note}</div>` : ''}
-        </div>
-      `).join('')}
+      <div style="font-size:12px;color:var(--dim);margin:14px 0 4px;">Trabajo de hombro reubicado en S1 (calentamiento) y S3 (Hombro Terapéutico).</div>
       <button id="btn-print-session"
         style="width:100%;margin-top:20px;padding:16px;border-radius:14px;
                border:1px solid var(--border);background:transparent;color:var(--dim);

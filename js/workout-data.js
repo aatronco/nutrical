@@ -25,6 +25,8 @@ export const S1 = {
     { name: 'Rotación externa mancuerna',          load: '3–5 kg',        sets: 2, reps: '12/lado', rest: 30 },
     { name: 'Deadbug con disco',                   load: '10 kg',         sets: 2, reps: '8/lado', rest: 30 },
     { name: 'Elevaciones laterales activación',    load: '4–5 kg',        sets: 2, reps: '15',    rest: 30 },
+    { name: 'Retracción + depresión escapular',    load: 'Peso corporal', sets: 2, reps: '10',    rest: 30 },
+    { name: 'Isométrico acostado o en pared',      load: '5 kg (progresar)', sets: 3, reps: '12', rest: 60 },
   ],
 
   T1: {
@@ -168,6 +170,8 @@ export const S3 = {
       { name: 'Chaos push up (pelota)',            load: 'Bandas gruesas', setsReps: '2×máx' },
       { name: 'Press serrato unilateral',          load: '@8',            setsReps: '2×20' },
       { name: 'Press banca inclinado con barra',   load: '@7',            setsReps: '3×8-10', note: 'Con barra, NO multipower.' },
+      { name: 'Nadador con bandas',                load: 'Banda tensa',   setsReps: '2×12/brazo' },
+      { name: 'Deadbug con disco',                 load: '25 kg',         setsReps: '2×10/lado' },
     ],
   },
 };
@@ -269,7 +273,7 @@ export const S5 = {
 
 // ── Kine: S2 y S4 ───────────────────────────────────────────────────────────
 export const KINE = {
-  name: 'Kine — S2 y S4',
+  name: 'Piernas — S2 y S4',
   color: 'cyan',
   readonly: true,
   evaMax: 3,
@@ -285,16 +289,7 @@ export const KINE = {
     { num: 8, name: 'Búlgaras unilaterales',                load: '12→28→30 kg',   reps: '12-15/pierna',       rest: 60 },
     { num: 9, name: 'Pata de glúteo en polea',              load: 'RPE 10',         sets: 3, reps: '12-15',    rest: 0 },
   ],
-  bloqueHombro: [
-    { num: 1, name: 'Retracción + depresión escapular',     load: 'Peso corporal', sets: 2, reps: '10',       rest: 30 },
-    { num: 2, name: 'Isométrico acostado o en pared',       load: '5 kg (progresar)', sets: 3, reps: '12',    rest: 60 },
-    { num: 3, name: 'Press landmine',                       load: '25 kg',         sets: 2, reps: '12',       rest: 60 },
-    { num: 4, name: 'Deadbug con disco',                    load: '25 kg',         sets: 2, reps: '10/lado',  rest: 30 },
-    { num: 5, name: 'Chaos push up (pelota)',                load: 'Bandas gruesas', sets: 2, reps: 'máx',     rest: 30 },
-    { num: 6, name: 'Press serrato unilateral',              load: '@8',            sets: 2, reps: '20',       rest: 30 },
-    { num: 7, name: 'Press banca inclinado con barra',       load: '@7',            sets: 3, reps: '8-10',     rest: 60, note: 'Con barra, NO multipower.' },
-    { num: 8, name: 'Nadador con bandas',                    load: 'Banda tensa',   reps: '12/brazo',         rest: 60 },
-  ],
+  // Bloque Hombro (ex-Kine) redistribuido a S1 (warmup) y S3 (hombroTerapeutico) — ver ahí.
 };
 
 export const SESSIONS = { S1, S3, S5, kine: KINE };
