@@ -1,5 +1,5 @@
 // js/load-calculator.js
-import { SESSIONS } from './workout-data.js';
+import { SESSIONS, PROGRAM_WEEKS } from './workout-data.js';
 
 export function getT1Sets(session, week) {
   const s = SESSIONS[session];
@@ -11,11 +11,11 @@ export function getT1Sets(session, week) {
 
 export function getCurrentWeek(programStartDate, weekOverride) {
   if (weekOverride != null) {
-    return Math.min(Math.max(parseInt(weekOverride, 10), 1), 6);
+    return Math.min(Math.max(parseInt(weekOverride, 10), 1), PROGRAM_WEEKS);
   }
   const start = new Date(programStartDate);
   const now   = new Date();
   const days  = Math.floor((now - start) / (1000 * 60 * 60 * 24));
   const week  = Math.floor(days / 7) + 1;
-  return Math.min(Math.max(week, 1), 6);
+  return Math.min(Math.max(week, 1), PROGRAM_WEEKS);
 }

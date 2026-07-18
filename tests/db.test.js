@@ -16,24 +16,58 @@ test('STORES contains workout_sessions', () => {
 
 test('validateSession accepts valid session', () => {
   const s = {
-    date: '2026-06-28', session: 'S1', week: 1,
-    phase: 'volumen', completed: false, sets: []
+    date: '2026-07-20', session: 'S1', week: 1,
+    phase: 'bloque1', completed: false, sets: []
+  };
+  assert.doesNotThrow(() => validateSession(s));
+});
+
+test('validateSession accepts new leg days S2 and S4', () => {
+  for (const key of ['S2', 'S4']) {
+    const s = {
+      date: '2026-07-20', session: key, week: 3,
+      phase: 'bloque1', completed: true, sets: []
+    };
+    assert.doesNotThrow(() => validateSession(s));
+  }
+});
+
+test('validateSession accepts week 12 in peaking phase', () => {
+  const s = {
+    date: '2026-10-05', session: 'S5', week: 12,
+    phase: 'peaking', completed: true, sets: []
   };
   assert.doesNotThrow(() => validateSession(s));
 });
 
 test('validateSession rejects invalid session name', () => {
   const s = {
-    date: '2026-06-28', session: 'S9', week: 1,
-    phase: 'volumen', completed: false, sets: []
+    date: '2026-07-20', session: 'S9', week: 1,
+    phase: 'bloque1', completed: false, sets: []
+  };
+  assert.throws(() => validateSession(s), /session/);
+});
+
+test('validateSession rejects retired kine session key', () => {
+  const s = {
+    date: '2026-07-20', session: 'kine', week: 1,
+    phase: 'bloque1', completed: false, sets: []
   };
   assert.throws(() => validateSession(s), /session/);
 });
 
 test('validateSession rejects week out of range', () => {
   const s = {
-    date: '2026-06-28', session: 'S1', week: 9,
-    phase: 'volumen', completed: false, sets: []
+    date: '2026-07-20', session: 'S1', week: 13,
+    phase: 'bloque1', completed: false, sets: []
   };
   assert.throws(() => validateSession(s), /week/);
+});
+
+test('validateSession rejects retired GZCLP phase names', () => {
+  const s = {
+    date: '2026-07-20', session: 'S1', week: 1,
+    phase: 'volumen', completed: false, sets: []
+  };
+  assert.throws(() => validateSession(s), /phase/);
 });

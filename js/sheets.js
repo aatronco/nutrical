@@ -148,6 +148,59 @@ export async function getConsultations(pacienteId) {
     .filter(c => c.paciente_id === pacienteId);
 }
 
+// ── Workout backup (pestañas Entrenamientos y PRs) ───────────────────────────
+const WORKOUT_TABS = {
+  Entrenamientos: ['fecha', 'sesion', 'semana', 'fase', 'atleta', 'sincronizado_en'],
+  PRs:            ['fecha', 'atleta', 'banca', 'deadlift', 'sentadilla', 'pullups'],
+};
+
+// Memoizado por carga de página: crea las pestañas que falten (con encabezado).
+let _tabsEnsured = null;
+export function ensureWorkoutTabs() {
+  if (!_tabsEnsured) {
+    _tabsEnsured = _ensureWorkoutTabs().catch(err => { _tabsEnsured = null; throw err; });
+  }
+  return _tabsEnsured;
+}
+
+async function _ensureWorkoutTabs() {
+  const id = getSpreadsheetId();
+  if (!id) throw new Error('sin spreadsheet configurado');
+  const meta = await request(`${BASE}/${id}?fields=sheets.properties.title`);
+  if (!meta?.sheets) throw new Error('no se pudo leer el spreadsheet');
+  const existing = meta.sheets.map(s => s.properties.title);
+  const missing  = Object.keys(WORKOUT_TABS).filter(t => !existing.includes(t));
+  if (!missing.length) return true;
+
+  const created = await request(`${BASE}/${id}:batchUpdate`, {
+    method: 'POST',
+    body: JSON.stringify({ requests: missing.map(title => ({ addSheet: { properties: { title } } })) }),
+  });
+  if (!created) throw new Error('no se pudieron crear las pestañas');
+
+  for (const title of missing) {
+    await request(`${BASE}/${id}/values/${title}!A1?valueInputOption=RAW`, {
+      method: 'PUT', body: JSON.stringify({ values: [WORKOUT_TABS[title]] }),
+    });
+  }
+  return true;
+}
+
+export async function appendRows(sheetTitle, rows) {
+  const id = getSpreadsheetId();
+  return request(`${BASE}/${id}/values/${sheetTitle}!A:A:append?valueInputOption=RAW`, {
+    method: 'POST', body: JSON.stringify({ values: rows }),
+  });
+}
+
+// Devuelve las filas de datos (sin encabezado); [] si la pestaña está vacía, null si falló.
+export async function getRows(sheetTitle) {
+  const id   = getSpreadsheetId();
+  const data = await request(`${BASE}/${id}/values/${sheetTitle}!A2:Z`);
+  if (!data) return null;
+  return data.values || [];
+}
+
 export async function saveConsultation(consulta) {
   const id  = getSpreadsheetId();
   const url = `${BASE}/${id}/values/Consultas!A2:AQ`;

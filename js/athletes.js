@@ -1,6 +1,7 @@
 // js/athletes.js
-// Multi-athlete management for the GZCLP workout app.
+// Multi-athlete management for the workout app.
 // Each athlete has their own program start date and PR records in localStorage.
+import { PROGRAM_WEEKS } from './workout-data.js';
 
 const STORE_KEY = 'gzclp_athletes';
 const ACTIVE_KEY = 'gzclp_active_athlete';
@@ -10,7 +11,8 @@ export const DEFAULT_ATHLETES = [
     id: 'alejandro',
     name: 'Alejandro',
     icon: '🏋️',
-    prBase: { banca: 125, deadlift: 140, pullups: 6 },
+    // e1RM estimados julio 2026 (en déficit, PC 105 kg)
+    prBase: { banca: 117, deadlift: 190, pullups: 5 },
   },
 ];
 
@@ -89,6 +91,6 @@ export function getAthleteWeekOverride(athleteId) {
 }
 
 export function setAthleteWeekOverride(athleteId, week) {
-  const clamped = Math.min(Math.max(parseInt(week, 10), 1), 6);
+  const clamped = Math.min(Math.max(parseInt(week, 10), 1), PROGRAM_WEEKS);
   localStorage.setItem(athleteKey(athleteId, 'week_override'), String(clamped));
 }

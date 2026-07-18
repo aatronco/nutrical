@@ -1,16 +1,19 @@
 // js/db.js
+import { SESSIONS, PHASES, PROGRAM_WEEKS } from './workout-data.js';
+
 export const DB_NAME    = 'workout-app';
 export const DB_VERSION = 1;
 export const STORES     = ['workout_sessions'];
 
-const VALID_SESSIONS = ['S1', 'S3', 'S5', 'kine'];
-const VALID_PHASES   = ['volumen', 'acumulacion', 'intensificacion', 'peak_pr'];
+// Derivados del programa — un solo origen de verdad en workout-data.js.
+const VALID_SESSIONS = Object.keys(SESSIONS);
+const VALID_PHASES   = PHASES.map(p => p.name);
 
 export function validateSession(s) {
   if (!VALID_SESSIONS.includes(s.session))
     throw new Error(`session must be one of ${VALID_SESSIONS.join('|')}, got "${s.session}"`);
-  if (s.week < 1 || s.week > 6)
-    throw new Error(`week must be 1–6, got ${s.week}`);
+  if (s.week < 1 || s.week > PROGRAM_WEEKS)
+    throw new Error(`week must be 1–${PROGRAM_WEEKS}, got ${s.week}`);
   if (!VALID_PHASES.includes(s.phase))
     throw new Error(`phase must be one of ${VALID_PHASES.join('|')}, got "${s.phase}"`);
 }

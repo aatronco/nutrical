@@ -1,5 +1,6 @@
 // js/views/dashboard.js
 import { getCurrentWeek } from '../load-calculator.js';
+import { PROGRAM_WEEKS, getPhaseForWeek } from '../workout-data.js';
 import { getAthletes, getActiveAthlete, getActiveAthleteId, setActiveAthlete,
          saveAthlete, deleteAthlete, getAthletePRs, setAthletePRs,
          getAthleteProgramStart, setAthleteProgramStart,
@@ -46,10 +47,10 @@ export function renderDashboard() {
         <div class="hero-eyebrow">▸ PRIDE EDITION ▸</div>
         <h1>${esc(athlete.icon||'🏋️')} ${esc(athlete.name)} —
           <button class="week-nav-btn" data-week-action="prev" aria-label="Semana anterior" ${week<=1?'disabled':''}>‹</button>
-          S${week}/6
-          <button class="week-nav-btn" data-week-action="next" aria-label="Semana siguiente" ${week>=6?'disabled':''}>›</button>
+          S${week}/${PROGRAM_WEEKS}
+          <button class="week-nav-btn" data-week-action="next" aria-label="Semana siguiente" ${week>=PROGRAM_WEEKS?'disabled':''}>›</button>
         </h1>
-        <p class="hero-sub">GZCLP v6 — ${phaseLabel(week)}</p>
+        <p class="hero-sub">GZCL The Rippler — ${getPhaseForWeek(week).label}</p>
       </div>
 
       <div class="pr-strip" style="padding:0;margin-bottom:16px;">
@@ -69,16 +70,19 @@ export function renderDashboard() {
 
       <div style="display:flex;flex-direction:column;gap:10px;">
         <a href="#/workout/S1" style="display:block;padding:16px;background:var(--card);border:1px solid var(--pink);border-radius:14px;color:var(--pink);font-weight:800;text-decoration:none;text-align:center;">
-          💪 Iniciar S1 — Empuje
+          💪 S1 — Empuje · Banca
+        </a>
+        <a href="#/workout/S2" style="display:block;padding:16px;background:var(--card);border:1px solid var(--cyan);border-radius:14px;color:var(--cyan);font-weight:800;text-decoration:none;text-align:center;">
+          🏔️ S2 — Pierna · Cuádriceps
         </a>
         <a href="#/workout/S3" style="display:block;padding:16px;background:var(--card);border:1px solid var(--mint);border-radius:14px;color:var(--mint);font-weight:800;text-decoration:none;text-align:center;">
-          💪 Iniciar S3 — Tirón
+          💪 S3 — Tirón · Dominadas
+        </a>
+        <a href="#/workout/S4" style="display:block;padding:16px;background:var(--card);border:1px solid var(--orange);border-radius:14px;color:var(--orange);font-weight:800;text-decoration:none;text-align:center;">
+          🏔️ S4 — Pierna · Glúteo/Posterior
         </a>
         <a href="#/workout/S5" style="display:block;padding:16px;background:var(--card);border:1px solid var(--gold);border-radius:14px;color:var(--gold);font-weight:800;text-decoration:none;text-align:center;">
-          💪 Iniciar S5 — Cadena Posterior
-        </a>
-        <a href="#/workout/kine" style="display:block;padding:16px;background:var(--card);border:1px solid var(--cyan);border-radius:14px;color:var(--cyan);font-weight:800;text-decoration:none;text-align:center;">
-          🏔️ Piernas — S2 / S4
+          💪 S5 — Cadena Posterior · Peso Muerto
         </a>
         <a href="#/progress" style="display:block;padding:16px;background:var(--card);border:1px solid var(--purple);border-radius:14px;color:var(--purple);font-weight:800;text-decoration:none;text-align:center;">
           📈 Ver Progresión
@@ -125,16 +129,16 @@ export function renderDashboard() {
 
 function gzclpInfo() {
   const PRO = [
-    ['Estructura en 3 niveles',  'T1 (fuerza máxima) → T2 (hipertrofia) → T3 (aislamiento). Cada sesión trabaja las tres adaptaciones simultáneamente, sin que compitan entre sí por intensidad.'],
-    ['Progresión lineal simple', 'El peso sube semana a semana basado en porcentajes del PR. No hay que pensar — el programa decide la carga. Ideal para consolidar la técnica bajo fatiga acumulada.'],
-    ['Autoregulado',             'Las semanas de Peak PR son optativos (OPT-IN). Si el cuerpo no está listo, se omite el intento y se vuelve a acumular. Reduce el riesgo de lesión por ego.'],
-    ['Alta frecuencia de press', 'Banca aparece en S1 y como T2 en S3. La frecuencia 2×/semana con volúmenes distintos acelera la adaptación neuromotora en patrones de empuje.'],
+    ['Olas que perdonan',        'La carga sube "dos pasos adelante, uno atrás" en bloques de 4 semanas. Un mal día no rompe el programa — la ola vuelve a pasar por ahí. Clave en déficit calórico.'],
+    ['Intensidad sin desgaste',  'T1 trabaja al 80–95% del 2RM con pocas reps: máximo estímulo neural para retener fuerza mientras bajas de peso, con volumen controlado.'],
+    ['Autoregulado',             'Las series AMRAP son "máximas reps con técnica sólida", no al fallo. Y los intentos de 1RM en semana 12 son OPT-IN — si el cuerpo no está, no se hacen.'],
+    ['12 semanas de horizonte',  'Tres bloques + peaking dan margen para absorber una semana mala de sueño o estrés sin descarrilar el ciclo completo.'],
   ];
   const CON = [
-    ['Poco volumen de pierna',   'Deadlift y sentadilla se trabajan en S5 y S2 respectivamente con baja frecuencia semanal. Para hipertrofia de cuádriceps puede ser insuficiente sin T2/T3 complementarios.'],
-    ['No es un programa de hipertrofia pura', 'El foco en T1 pesado reduce el volumen total. Si el objetivo es volumen máximo de músculo, bloques de hipertrofia dedicados son más eficientes.'],
-    ['Requiere historial de PRs', 'Los porcentajes de carga se calculan desde un 1RM conocido. Sin datos previos sólidos, las primeras semanas pueden ser demasiado conservadoras o agresivas.'],
-    ['Mesociclo corto (6 sem)',  'Un pico de 6 semanas no da margen para corregir una semana mala de sueño, estrés o lesión menor. Un bloque de 8-12 semanas sería más robusto para la mayoría.'],
+    ['Requiere RMs decentes',    'Los porcentajes se calculan desde 2RM y 5RM. Con estimados (Epley) las primeras semanas calibran: si una ola se siente @6 o menos, el RM base está bajo.'],
+    ['Singles demandantes',      'Desde la semana 8 aparecen singles al 92.5%+. Exigen técnica consolidada y buena entrada en calor — no saltarse la rampa de calentamiento.'],
+    ['Testear 1RM en déficit',   'El test de semana 12 en déficit puede quedar corto vs tu fuerza real. Superar el 2RM base ya es progreso; el PR absoluto llegará en mantenimiento.'],
+    ['No es hipertrofia pura',   'El volumen total es moderado. La retención muscular en déficit la sostienen los T2/T3 y los días de pierna — no los saltes.'],
   ];
 
   const row = ([title, text], color) => `
@@ -151,7 +155,7 @@ function gzclpInfo() {
       <button id="gzclp-toggle" style="width:100%;background:transparent;border:none;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;text-align:left">
         <div>
           <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:3px">MÉTODO</div>
-          <div style="font-size:14px;font-weight:800;color:var(--cyan);font-family:'Orbitron',sans-serif;letter-spacing:.05em">¿Qué es GZCLP?</div>
+          <div style="font-size:14px;font-weight:800;color:var(--cyan);font-family:'Orbitron',sans-serif;letter-spacing:.05em">¿Qué es The Rippler?</div>
         </div>
         <span id="gzclp-arrow" style="font-size:18px;color:var(--dim);transition:transform .2s">▸</span>
       </button>
@@ -163,10 +167,10 @@ function gzclpInfo() {
           <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;font-family:'JetBrains Mono',monospace">ORIGEN</div>
           <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:8px">
             <strong style="color:var(--cyan)">GZCL</strong> son las iniciales de <strong>Cody Lefever</strong> (usuario <em>u/gzcl</em> en Reddit), soldado del ejército estadounidense y powerlifter de élite.
-            Desarrolló el <strong>Método GZCL</strong> (~2012) mientras entrenaba en condiciones de despliegue militar, donde el acceso al gimnasio era irregular y necesitaba un sistema adaptable y eficiente.
+            <strong style="color:var(--cyan)">The Rippler</strong> es su programa intermedio (de <em>GZCL Applications &amp; Adaptations</em>, 2016) — el paso siguiente cuando la progresión lineal de GZCLP se estanca.
           </div>
           <div style="font-size:12px;color:var(--text);line-height:1.6">
-            <strong style="color:var(--cyan)">GZCLP</strong> = <strong>GZCL Linear Progression</strong>. Es la versión de progresión lineal del método, diseñada para el rango <em>intermedio-avanzado</em>: atletas que ya superaron los programas de novato (5×5, StrongLifts) pero que aún no requieren periodización compleja por bloques.
+            El nombre viene del patrón de <em>ondas</em> ("ripples"): la intensidad del T1 sube y baja semana a semana en bloques de 4, acumulando cada vez más alto. T1 se calcula desde tu <strong>2RM</strong> y T2 desde tu <strong>5RM</strong>, en 12 semanas que culminan con 2RM pesados (sem 11) y test de 1RM opcional (sem 12).
           </div>
         </div>
 
@@ -176,15 +180,15 @@ function gzclpInfo() {
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <div style="background:rgba(255,0,128,.08);border:1px solid rgba(255,0,128,.2);border-radius:8px;padding:10px;text-align:center">
               <div style="font-size:16px;font-weight:900;color:var(--pink);font-family:'Orbitron',sans-serif">T1</div>
-              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Fuerza máxima<br>1–5 reps<br>85–100% 1RM</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Olas de 2RM<br>1–5 reps<br>80–95% 2RM</div>
             </div>
             <div style="background:rgba(0,255,159,.08);border:1px solid rgba(0,255,159,.2);border-radius:8px;padding:10px;text-align:center">
               <div style="font-size:16px;font-weight:900;color:var(--mint);font-family:'Orbitron',sans-serif">T2</div>
-              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Hipertrofia<br>8–12 reps<br>65–80% 1RM</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Olas de 5RM<br>3–6 reps<br>68–85% 5RM</div>
             </div>
             <div style="background:rgba(255,230,0,.08);border:1px solid rgba(255,230,0,.2);border-radius:8px;padding:10px;text-align:center">
               <div style="font-size:16px;font-weight:900;color:var(--gold);font-family:'Orbitron',sans-serif">T3</div>
-              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Aislamiento<br>15–25 reps<br>40–60% 1RM</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4">Aislamiento<br>reps altas<br>AMRAP flexible</div>
             </div>
           </div>
         </div>
@@ -203,21 +207,20 @@ function gzclpInfo() {
 
         <!-- Modificaciones -->
         <div style="background:rgba(160,100,255,.06);border:1px solid rgba(160,100,255,.25);border-radius:10px;padding:14px;margin-bottom:4px">
-          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--purple);margin-bottom:10px;font-family:'JetBrains Mono',monospace">⚡ MODIFICACIONES — GZCLP v6</div>
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--purple);margin-bottom:10px;font-family:'JetBrains Mono',monospace">⚡ MODIFICACIONES — RIPPLER × KINE</div>
           <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">
-            Esta versión introduce un <strong style="color:var(--purple)">bloque de sentadilla 2×/semana</strong> (S2 y S4)
-            para compensar directamente la limitación de cuádriceps del GZCLP estándar,
-            combinado con un protocolo de rehabilitación de rodilla activa.
+            Esta versión adapta el Rippler clásico de 4 días a una <strong style="color:var(--purple)">semana de 5 días con el programa del kinesiólogo integrado</strong> (actualización julio 2026).
           </div>
           ${[
-            ['Sentadilla 2×/semana', 'S2 usa back squat y S4 usa front squat como movimientos de cuádriceps dominante. La variación entre sesiones desarrolla patrones motores complementarios; la frecuencia doble genera el volumen de cuádriceps que el GZCLP estándar no cubre.'],
-            ['Protocolo rodilla integrado',   'Los días S2/S4 combinan trabajo de cuádriceps con ejercicios de estabilización de rodilla (pogos búlgaros, high step, pistol asistido). Permite progresar fuerza sin agravar patologías previas de rodilla.'],
-            ['T2 de banca en S3',             'El press banca aparece como T2 en la sesión de tirón, aumentando la frecuencia de empuje horizontal a 2×/semana sin añadir días de entrenamiento extra.'],
+            ['Pierna por RPE, no por olas',  'S2 (cuádriceps) y S4 (glúteo/posterior) siguen la receta del kine con cargas por RPE y regla EVA ≤3. Reemplazan el día de sentadilla del Rippler clásico.'],
+            ['Dominadas como T1',            'En vez de press militar como cuarto T1, S3 usa dominadas con ola de 2RM sobre el peso total (cuerpo + lastre): asistidas en las semanas livianas, lastradas en las pesadas.'],
+            ['Hombro terapéutico repartido', 'El bloque de hombro del kine vive en S1 (empuje: chaos push up, serrato, banca inclinada) y S3 (rehabilitación: escapular, isométrico, flexoextensión). Es parte estructural, no accesorio.'],
+            ['Bloque E en S5',               'Tras el peso muerto, un mini-bloque de pierna del kine (extensión, prensa, RDL unilateral) suma el tercer estímulo semanal de pierna con carga moderada.'],
           ].map(r => row(r, 'var(--purple)')).join('')}
         </div>
 
         <div style="font-size:10px;color:rgba(255,255,255,.2);text-align:right;margin-top:12px;font-family:'JetBrains Mono',monospace">
-          Fuente: u/gzcl · reddit.com/r/gzcl · Lefever (2014) <em>GZCL Method</em>
+          Fuente: u/gzcl · reddit.com/r/gzcl · Lefever (2016) <em>GZCL Applications &amp; Adaptations</em>
         </div>
       </div>
     </div>`;
@@ -225,6 +228,9 @@ function gzclpInfo() {
 
 export function bindDashboard() {
   const athlete = getActiveAthlete();
+
+  // Vaciar cola de respaldo pendiente (sesiones/PRs que no alcanzaron a subir a Sheets)
+  import('../workout-sync.js').then(m => m.flushQueue()).catch(() => {});
 
   // Manual week selector
   document.querySelectorAll('[data-week-action]').forEach(btn => {
@@ -288,11 +294,4 @@ export function bindDashboard() {
     setActiveAthlete(id);
     location.reload();
   });
-}
-
-function phaseLabel(week) {
-  if (week <= 2) return 'Fase Volumen';
-  if (week <= 4) return 'Intens. Progresiva';
-  if (week === 5) return 'Intensificación';
-  return 'Peak PR ★';
 }

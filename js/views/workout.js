@@ -4,19 +4,22 @@ import { getT1Sets, getCurrentWeek } from '../load-calculator.js';
 import { saveSession }                from '../db.js';
 import { createTimer }                from '../timer.js';
 import { getActiveAthleteId, getAthleteWeekOverride } from '../athletes.js';
+import { pushSession }                from '../workout-sync.js';
 
 let activeTimer = null;
 
 export function renderWorkout(sessionKey) {
   const session = SESSIONS[sessionKey];
   if (!session) return `<p style="padding:20px;color:var(--dim)">Sesión no encontrada.</p>`;
-  if (session.readonly) return renderKine(session);
 
   const startDate = localStorage.getItem('gzclp_program_start') || new Date().toISOString().slice(0,10);
   const athleteId = getActiveAthleteId();
   const week      = getCurrentWeek(startDate, getAthleteWeekOverride(athleteId));
   const phase     = getPhaseForWeek(week);
-  const t1Sets    = getT1Sets(sessionKey, week);
+
+  const body = session.bloque
+    ? renderPierna(session)
+    : renderTiers(sessionKey, session, week);
 
   return `
     <div style="padding:14px 14px 20px;" id="workout-view">
@@ -26,27 +29,7 @@ export function renderWorkout(sessionKey) {
         ◈ ${phase.label} — Semana ${week}
       </div>
 
-      ${sessionKey === 'S1' ? renderWarmup(session.warmup) : ''}
-
-      <h2 class="sh" style="margin-top:18px;">
-        <span class="dot" style="background:var(--${session.color})"></span>T1 — ${session.T1.exercise}
-      </h2>
-      ${t1Sets.length === 0 && session.T1.frente1
-          ? renderT1Frentes(session.T1, week)
-          : renderT1Table(t1Sets)}
-
-      <h2 class="sh" style="margin-top:18px;">
-        <span class="dot" style="background:var(--mint)"></span>T2 — Hipertrofia
-        <span style="font-size:11px;color:var(--dim);font-weight:400;">tempo 2-3s · última RPE 9</span>
-      </h2>
-      ${renderT2List(session.T2, week)}
-
-      ${session.hombroTerapeutico ? renderHombroTerapeutico(session.hombroTerapeutico) : ''}
-
-      <h2 class="sh" style="margin-top:18px;">
-        <span class="dot" style="background:var(--orange)"></span>T3 — Aislamiento
-      </h2>
-      ${renderT3List(session.T3, week)}
+      ${body}
 
       <div style="display:flex;gap:10px;margin-top:24px;">
         <button id="btn-print-session"
@@ -71,6 +54,56 @@ export function renderWorkout(sessionKey) {
   `;
 }
 
+function renderTiers(sessionKey, session, week) {
+  const t1Sets = getT1Sets(sessionKey, week);
+  return `
+    ${session.warmup ? renderWarmup(session.warmup) : ''}
+
+    <h2 class="sh" style="margin-top:18px;">
+      <span class="dot" style="background:var(--${session.color})"></span>T1 — ${session.T1.exercise}
+    </h2>
+    ${session.T1.note ? `<div style="font-size:12px;color:#ddb0ff;margin-bottom:8px;">${session.T1.note}</div>` : ''}
+    ${renderT1Table(t1Sets)}
+
+    <h2 class="sh" style="margin-top:18px;">
+      <span class="dot" style="background:var(--mint)"></span>T2 — Hipertrofia
+      <span style="font-size:11px;color:var(--dim);font-weight:400;">olas de 5RM · accesorios última serie RPE 9</span>
+    </h2>
+    ${renderT2List(session.T2, week)}
+
+    ${session.kineBlock ? renderKineBlock(session.kineBlock) : ''}
+
+    <h2 class="sh" style="margin-top:18px;">
+      <span class="dot" style="background:var(--orange)"></span>T3 — Aislamiento
+    </h2>
+    ${renderT3List(session.T3, week)}
+  `;
+}
+
+function renderPierna(session) {
+  return `
+    <div class="eva-warning">⚠ EVA máximo ${session.evaMax}/10 — si hay molestia, reducir y reportar al kinesiólogo.</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <h2 style="font-size:17px;font-weight:800;color:var(--text);">${session.name}</h2>
+      <span class="badge-kine">RECETA KINE — carga por RPE</span>
+    </div>
+    ${session.bloque.map(e => `
+      <div class="session-card">
+        <div class="session-card__title">
+          ${e.num}. ${e.name}
+          ${e.video ? '<span style="background:var(--cyan);color:#001020;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;">VIDEO</span>' : ''}
+        </div>
+        <div class="ex-meta" style="font-size:13px;color:var(--dim);">
+          <b style="color:var(--text)">${e.load}</b> · ${e.setsReps} · ${e.rest || 0}"
+          ${e.rest > 0 ? `<button data-rest="${e.rest}" style="background:var(--purple);border:none;border-radius:8px;padding:3px 10px;color:#fff;font-size:11px;cursor:pointer;margin-left:8px;">▶</button>` : ''}
+        </div>
+        ${e.note ? `<div style="font-size:12px;color:#ddb0ff;margin-top:5px;">${e.note}</div>` : ''}
+      </div>
+    `).join('')}
+    <div style="font-size:12px;color:var(--dim);margin:14px 0 4px;">Enviar video al kine de los ejercicios marcados VIDEO.</div>
+  `;
+}
+
 export function bindWorkout(sessionKey) {
   const session = SESSIONS[sessionKey];
 
@@ -81,7 +114,7 @@ export function bindWorkout(sessionKey) {
     window.print();
   });
 
-  if (!session || session.readonly) return;
+  if (!session) return;
 
   // Clean up any active timer from previous session
   if (activeTimer) { activeTimer.stop(); activeTimer = null; }
@@ -106,15 +139,16 @@ export function bindWorkout(sessionKey) {
       const athleteId = getActiveAthleteId();
       const week      = getCurrentWeek(startDate, getAthleteWeekOverride(athleteId));
       const phase     = getPhaseForWeek(week);
+      const record = {
+        date: new Date().toISOString().slice(0,10),
+        session: sessionKey,
+        week,
+        phase: phase.name,
+        completed: true,
+        sets: [],
+      };
       try {
-        await saveSession({
-          date: new Date().toISOString().slice(0,10),
-          session: sessionKey,
-          week,
-          phase: phase.name,
-          completed: true,
-          sets: [],
-        });
+        await saveSession(record);
         completeBtn.textContent = '✓ ¡Sesión guardada!';
         completeBtn.style.background = 'var(--mint)';
         completeBtn.style.color = '#0a2010';
@@ -122,7 +156,15 @@ export function bindWorkout(sessionKey) {
       } catch (err) {
         completeBtn.textContent = 'Error al guardar';
         completeBtn.disabled = false;
+        return;
       }
+      // Respaldo en Google Sheets — best effort, la sesión ya está guardada localmente
+      try {
+        const res = await pushSession(record, athleteId);
+        completeBtn.textContent = res.pending
+          ? '✓ Guardada · ☁ respaldo pendiente'
+          : '✓ Guardada · ☁ respaldada';
+      } catch { /* queda en cola para el próximo arranque */ }
     });
   }
 }
@@ -167,35 +209,14 @@ function renderT1Table(sets) {
   `;
 }
 
-function renderT1Frentes(t1, week) {
-  const { frente1, frente2 } = t1;
-  const fmtRest = s => (s >= 60 && s % 60 === 0) ? `${s / 60} min` : `${s} s`;
-  const f2Reps  = Array.isArray(frente2.reps) ? frente2.reps.join('-') : frente2.reps;
-  const f1Sets  = frente1.setsByWeek?.[week] ?? frente1.sets;
-  return `
-    <div class="session-card">
-      <div class="session-card__title">${frente1.label}</div>
-      <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-        <b style="color:var(--text)">${f1Sets} series al fallo controlado</b> · descanso ${fmtRest(frente1.rest)}
-        <button data-rest="${frente1.rest}" style="background:var(--purple);border:none;border-radius:8px;padding:4px 10px;color:#fff;font-size:11px;cursor:pointer;margin-left:8px;">▶</button>
-      </div>
-    </div>
-    <div class="session-card">
-      <div class="session-card__title">${frente2.label}</div>
-      <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-        <b style="color:var(--text)">${frente2.sets} series × ${f2Reps} reps asistidas</b> · descanso ${fmtRest(frente2.rest)}
-        <button data-rest="${frente2.rest}" style="background:var(--purple);border:none;border-radius:8px;padding:4px 10px;color:#fff;font-size:11px;cursor:pointer;margin-left:8px;">▶</button>
-      </div>
-      ${frente2.progressionNote ? `<div style="font-size:12px;color:#ddb0ff;margin-top:5px;">${frente2.progressionNote}</div>` : ''}
-    </div>
-  `;
-}
-
 function renderT2List(exercises, week) {
   return exercises
     .filter(e => !e.removeWeeks?.includes(week))
     .map(e => {
-      const setsReps = e.reduceWeeks?.[week] ?? e.setsReps;
+      const plan     = e.byWeek?.[week];
+      const setsReps = plan
+        ? `${plan.setsReps} @ ${plan.kg} kg`
+        : (e.reduceWeeks?.[week] ?? e.setsReps);
       return `
         <div class="session-card">
           <div class="session-card__title">
@@ -234,10 +255,10 @@ function renderT3List(exercises, week) {
     }).join('');
 }
 
-function renderHombroTerapeutico(bloque) {
+function renderKineBlock(bloque) {
   return `
     <div style="margin:16px 0 8px;font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;">
-      — Hombro Terapéutico —
+      ${bloque.label}
     </div>
     <div style="font-size:12px;color:var(--dim);margin-bottom:8px;">${bloque.note}</div>
     ${bloque.exercises.map(e => `
@@ -245,43 +266,11 @@ function renderHombroTerapeutico(bloque) {
         <div class="session-card__title">${e.name}</div>
         <div class="ex-meta" style="font-size:13px;color:var(--dim);">
           <b style="color:var(--text)">${e.load}</b> · ${e.setsReps}
+          ${e.rest > 0 ? `<button data-rest="${e.rest}" style="background:var(--purple);border:none;border-radius:8px;padding:3px 10px;color:#fff;font-size:11px;cursor:pointer;margin-left:8px;">▶</button>` : ''}
         </div>
         ${e.note ? `<div style="font-size:12px;color:#ddb0ff;margin-top:5px;">${e.note}</div>` : ''}
       </div>
     `).join('')}
-  `;
-}
-
-function renderKine(session) {
-  return `
-    <div style="padding:14px 14px 20px;">
-      <button class="btn btn-dim" data-back style="margin-bottom:12px;padding:8px 16px;">← Volver</button>
-
-      <div class="eva-warning">⚠ EVA máximo ${session.evaMax}/10 — si hay molestia, reducir y reportar al kinesiólogo.</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <h2 style="font-size:17px;font-weight:800;color:var(--text);">Piernas — S2 / S4</h2>
-        <span class="badge-kine">PROTOCOLO RODILLA — solo lectura</span>
-      </div>
-      <h3 style="font-size:14px;font-weight:700;color:var(--text);margin:12px 0 8px;padding-left:10px;border-left:3px solid var(--cyan);">Bloque Rodilla</h3>
-      ${session.bloqueRodilla.map(e => `
-        <div class="session-card">
-          <div class="session-card__title">
-            ${e.num}. ${e.name}
-            ${e.video ? '<span style="background:var(--cyan);color:#001020;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;">VIDEO</span>' : ''}
-          </div>
-          <div class="ex-meta" style="font-size:13px;color:var(--dim);">
-            <b style="color:var(--text)">${e.load}</b> · ${e.sets ? `${e.sets}×${e.reps}` : (e.reps ?? '—')} · ${e.rest || 0}"
-          </div>
-        </div>
-      `).join('')}
-      <div style="font-size:12px;color:var(--dim);margin:14px 0 4px;">Trabajo de hombro reubicado en S1 (calentamiento) y S3 (Hombro Terapéutico).</div>
-      <button id="btn-print-session"
-        style="width:100%;margin-top:20px;padding:16px;border-radius:14px;
-               border:1px solid var(--border);background:transparent;color:var(--dim);
-               font-size:14px;font-weight:700;cursor:pointer;">
-        🖶 Imprimir
-      </button>
-    </div>
   `;
 }
 

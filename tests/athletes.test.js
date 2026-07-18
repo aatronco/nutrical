@@ -25,9 +25,9 @@ test('setAthleteWeekOverride then getAthleteWeekOverride round-trips', () => {
   assert.equal(getAthleteWeekOverride('alejandro'), 3);
 });
 
-test('setAthleteWeekOverride clamps above 6', () => {
-  setAthleteWeekOverride('alejandro', 9);
-  assert.equal(getAthleteWeekOverride('alejandro'), 6);
+test('setAthleteWeekOverride clamps above 12', () => {
+  setAthleteWeekOverride('alejandro', 15);
+  assert.equal(getAthleteWeekOverride('alejandro'), 12);
 });
 
 test('setAthleteWeekOverride clamps below 1', () => {

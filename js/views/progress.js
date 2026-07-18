@@ -1,20 +1,23 @@
 // js/views/progress.js
 // Strength progression dashboard — shows planned vs actual PR targets per week.
-import { SESSIONS, PHASES, getPhaseForWeek } from '../workout-data.js';
+import { SESSIONS, PHASES, PROGRAM_WEEKS, getPhaseForWeek } from '../workout-data.js';
 import { getCurrentWeek } from '../load-calculator.js';
 import { getActiveAthleteId, getAthleteWeekOverride } from '../athletes.js';
+import { pushPRs, syncNow, pendingCount } from '../workout-sync.js';
+
+const WEEKS = Array.from({ length: PROGRAM_WEEKS }, (_, i) => i + 1);
 
 const LIFTS = [
   { key: 'S1', name: 'Press Banca', color: 'var(--pink)',   icon: '🏋️' },
   { key: 'S5', name: 'Deadlift',    color: 'var(--gold)',   icon: '⛓️'  },
 ];
-// Squat tracked separately — kine session uses RPE, no byWeek targets
+// Squat tracked separately — S2/S4 use kine RPE prescription, no byWeek targets
 const SQUAT_KEY = 'sentadilla';
 
 function getPRTargets(sessionKey) {
   const session = SESSIONS[sessionKey];
   if (!session?.T1?.byWeek) return [];
-  return [1,2,3,4,5,6].map(week => {
+  return WEEKS.map(week => {
     const sets = session.T1.byWeek[week];
     if (!sets) return { week, top: null };
     const topWork = [...(sets.warmup||[]), ...(sets.work||[])].filter(s => s.type !== 'warmup');
@@ -27,13 +30,13 @@ function getPRTargets(sessionKey) {
 function miniChart(lifts, targets, currentWeek, prs) {
   const W=360, H=130, PAD={t:16,r:12,b:32,l:40};
   const cW=W-PAD.l-PAD.r, cH=H-PAD.t-PAD.b;
-  const weeks=[1,2,3,4,5,6];
+  const weeks=WEEKS;
 
   const allVals=targets.flatMap(t=>t.filter(x=>x.top).map(x=>x.top));
   const minV=Math.min(...allVals)*0.95, maxV=Math.max(...allVals)*1.02;
   const range=maxV-minV||1;
 
-  const xOf=i=>PAD.l+(i/5)*cW;
+  const xOf=i=>PAD.l+(i/(PROGRAM_WEEKS-1))*cW;
   const yOf=v=>PAD.t+(1-(v-minV)/range)*cH;
 
   let s='';
@@ -69,9 +72,9 @@ function miniChart(lifts, targets, currentWeek, prs) {
     s+=`<text x="${(x+8).toFixed(1)}" y="${(y+4).toFixed(1)}" fill="${lift.color}" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">${actual} kg</text>`;
   });
 
-  // X axis labels
+  // X axis labels — con 12 semanas, etiquetar impares + la actual para no saturar
   weeks.forEach((w,i)=>{
-    const ph=getPhaseForWeek(w);
+    if (w % 2 === 0 && w !== currentWeek) return;
     s+=`<text x="${xOf(i).toFixed(1)}" y="${(PAD.t+cH+14).toFixed(1)}" text-anchor="middle" fill="${w===currentWeek?'#fff':'rgba(255,255,255,.4)'}" font-size="${w===currentWeek?9:8}" font-weight="${w===currentWeek?'700':'400'}" font-family="JetBrains Mono, monospace">S${w}</text>`;
   });
 
@@ -153,8 +156,8 @@ export function renderProgress() {
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div>
-          <div style="font-size:14px;font-weight:800;color:var(--cyan)">🏔️ Sentadilla (Back Squat)</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:2px">S2 back squat · S4 front squat · carga por RPE</div>
+          <div style="font-size:14px;font-weight:800;color:var(--cyan)">🏔️ Sentadilla (Squat low back bar)</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">S2 · receta kine · carga por RPE</div>
         </div>
         ${squatPR ? `<div style="text-align:center">
           <div style="font-size:22px;font-weight:800;color:var(--cyan)">${squatPR} kg</div>
@@ -162,24 +165,25 @@ export function renderProgress() {
         </div>` : `<div style="font-size:11px;color:var(--dim)">Sin PR registrado</div>`}
       </div>
       <div style="font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:10px">
-        S2 back squat 3×8 · S4 front squat 3×8 · Progresa cuando se siente @7 o menos
+        S2 squat low back bar 3×8 @8 · Progresa cuando se sienta @7 o menos · EVA ≤3
       </div>
     </div>`;
 
-  // Pull-up progression
+  // Pull-up progression — ola Rippler sobre 2RM total (cuerpo + lastre)
   const s3 = SESSIONS.S3;
-  const pullupCard = s3?.T1?.frente1 ? `
+  const pullupCard = s3?.T1?.byWeek ? `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="font-size:14px;font-weight:800;color:var(--mint);margin-bottom:8px">🔝 Pull-ups</div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        ${[1,2,3,4,5,6].map(w => {
-          const sets = s3.T1.frente1.setsByWeek?.[w] ?? s3.T1.frente1.sets;
-          const ph = getPhaseForWeek(w);
+      <div style="font-size:14px;font-weight:800;color:var(--mint);margin-bottom:4px">🔝 Dominadas — ola 2RM</div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:10px">2RM total ${s3.T1.base2RMTotal} kg (PC ${s3.T1.bodyweight} kg) · asistida en semanas livianas, lastre en las pesadas</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${WEEKS.map(w => {
+          const work = s3.T1.byWeek[w]?.work?.[0];
+          if (!work) return '';
           return `
-            <div style="flex:1;min-width:80px;background:${w===week?'rgba(0,255,159,.08)':'rgba(255,255,255,.03)'};border:1px solid ${w===week?'var(--mint)':'var(--border)'};border-radius:10px;padding:10px;text-align:center">
+            <div style="background:${w===week?'rgba(0,255,159,.08)':'rgba(255,255,255,.03)'};border:1px solid ${w===week?'var(--mint)':'var(--border)'};border-radius:10px;padding:8px;text-align:center">
               <div style="font-size:9px;color:var(--dim)">S${w}</div>
-              <div style="font-size:18px;font-weight:800;color:var(--mint)">${sets}</div>
-              <div style="font-size:9px;color:var(--dim)">series</div>
+              <div style="font-size:13px;font-weight:800;color:var(--mint)">${work.label}</div>
+              <div style="font-size:9px;color:var(--dim);line-height:1.3">${work.kg}</div>
             </div>`;
         }).join('')}
       </div>
@@ -210,13 +214,31 @@ export function renderProgress() {
       <button id="save-prs" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer">Guardar PRs</button>
     </div>`;
 
+  // Sync card — respaldo en Google Sheets (pestañas Entrenamientos y PRs)
+  const pending = pendingCount();
+  const syncCard = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">☁ Respaldo en Google Sheets</div>
+          <div id="sync-status" style="font-size:11px;color:var(--dim);margin-top:2px">
+            ${pending ? `${pending} registro${pending > 1 ? 's' : ''} pendiente${pending > 1 ? 's' : ''} de respaldar` : 'Sesiones y PRs se respaldan al guardar'}
+          </div>
+        </div>
+        <button id="sync-sheets" style="padding:10px 18px;background:transparent;border:1px solid var(--cyan);border-radius:10px;color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer">
+          Sincronizar ahora
+        </button>
+      </div>
+    </div>`;
+
   return `
     <div style="padding:14px 14px 20px">
       <button class="btn btn-dim" data-back style="margin-bottom:12px;padding:8px 16px;">← Volver</button>
 
-      <h2 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px">📈 Progresión GZCLP v6</h2>
-      <div style="font-size:12px;color:var(--dim);margin-bottom:20px">Semana ${week} de 6 — ${getPhaseForWeek(week).label}</div>
+      <h2 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px">📈 Progresión — The Rippler</h2>
+      <div style="font-size:12px;color:var(--dim);margin-bottom:20px">Semana ${week} de ${PROGRAM_WEEKS} — ${getPhaseForWeek(week).label}</div>
       ${updateForm}
+      ${syncCard}
       ${liftCards}
       ${squatCard}
       ${pullupCard}
@@ -239,10 +261,34 @@ export function bindProgress() {
     if (!isNaN(sentadilla)) prs[SQUAT_KEY] = sentadilla;
     if (!isNaN(pullups))    prs.pullups    = pullups;
     localStorage.setItem('gzclp_prs', JSON.stringify(prs));
+    // Respaldo: pushPRs encola de forma síncrona, así el reload no pierde la fila
+    pushPRs(prs, getActiveAthleteId()).catch(() => {});
     const btn = document.getElementById('save-prs');
     btn.textContent = '✓ Guardado';
     btn.style.background = 'var(--mint)';
     btn.style.color = '#001a0a';
     setTimeout(() => location.reload(), 800);
+  });
+
+  document.getElementById('sync-sheets')?.addEventListener('click', async () => {
+    const btn    = document.getElementById('sync-sheets');
+    const status = document.getElementById('sync-status');
+    btn.disabled = true;
+    btn.textContent = 'Sincronizando…';
+    try {
+      const res = await syncNow();
+      if (res.imported === null) {
+        status.textContent = `☁ ${res.synced} respaldada(s) — no se pudo leer el remoto`;
+      } else {
+        status.textContent = `☁ ${res.synced} respaldada(s) · ${res.imported} importada(s)` +
+          (res.prsRestored ? ' · PRs restaurados' : '') +
+          (res.pending ? ` · ${res.pending} pendiente(s)` : '');
+      }
+      if (res.imported || res.prsRestored) setTimeout(() => location.reload(), 1200);
+    } catch {
+      status.textContent = 'Sin conexión o sin sesión de Google — se reintentará después';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Sincronizar ahora';
   });
 }

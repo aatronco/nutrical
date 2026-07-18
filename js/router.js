@@ -10,9 +10,12 @@ import { renderWorkout, bindWorkout }                   from './views/workout.js
 import { renderProgress, bindProgress }                 from './views/progress.js';
 import { renderAppSelect, bindAppSelect }               from './views/app-select.js';
 
-const main    = () => document.getElementById('main');
-const nav     = () => document.getElementById('topnav');
-const bottomNav = () => document.getElementById('bottom-nav');
+// Declaraciones function (izadas) — con el import circular auth.js ⇄ router.js,
+// route() puede ejecutarse antes de que el cuerpo de este módulo se evalúe;
+// una const arrow quedaría en TDZ y rompería la carga directa de una ruta.
+function main()      { return document.getElementById('main'); }
+function nav()       { return document.getElementById('topnav'); }
+function bottomNav() { return document.getElementById('bottom-nav'); }
 
 const WORKOUT_ROUTES = ['dashboard', 'workout', 'nutrition', 'mobility', 'progress'];
 

@@ -1,5 +1,5 @@
 // sw.js
-const CACHE = 'brute-v1';
+const CACHE = 'brute-v3';
 const PRECACHE = [
   '/',
   '/index.html',
